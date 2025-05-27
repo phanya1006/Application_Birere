@@ -489,6 +489,11 @@ function initEventListeners() {
     document.getElementById('categoriesSlide').classList.remove('open');
     updateModalState();
   });
+  // fermeture produits
+document.querySelector('.close-details').addEventListener('click', (e) => {
+  e.stopPropagation();
+  closeProductDetails();
+});
  
   // Thème
   document.querySelectorAll('.theme-btn').forEach(btn => {
@@ -521,23 +526,39 @@ function initPWA() {
 }
 
 function showInstallButton() {
+  if (document.getElementById('installBtn')) return;
+
   const installBtn = document.createElement('button');
+  installBtn.id = 'installBtn';
   installBtn.className = 'install-btn';
   installBtn.innerHTML = '📲 Installer l\'app';
   installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      // Si deferredPrompt n'est pas disponible, guidez l'utilisateur
+      alert("Pour installer l'application, utilisez le menu de votre navigateur (icône de partage ou menu ⋮)");
+      return;
+    }
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
+      console.log('App installée');
       installBtn.remove();
     }
     deferredPrompt = null;
   });
   document.body.appendChild(installBtn);
+  
+  // Affichez toujours le bouton après 10s (solution alternative)
+  setTimeout(() => {
+    if (!document.getElementById('installBtn')) {
+      showInstallButton();
+    }
+  }, 10000);
 }
 /* ==================== SERVICE WORKER & PWA ==================== */
 
 // Enregistrement et gestion du Service Worker
+// Remplacez les deux définitions de initPWA() par cette version unique
 function initPWA() {
   // 1. Enregistrement du Service Worker
   if ('serviceWorker' in navigator) {
@@ -604,3 +625,14 @@ async function initApp() {
   updateCartCount();
   initPWA(); // <-- Ajoutez cette ligne !
 }
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log('beforeinstallprompt event fired'); // Debug
+  showInstallButton();
+  
+  // Debug: affichez les critères d'installation
+  e.userChoice.then(choice => {
+    console.log('User choice:', choice.outcome);
+  });
+});
