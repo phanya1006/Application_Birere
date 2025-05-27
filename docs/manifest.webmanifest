@@ -2,7 +2,7 @@
   "name": "Biréré Express",
   "short_name": "Biréré",
   "description": "Votre boutique en ligne",
-  "start_url": "/",
+  "start_url": "/Application_Birere/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#FFC107",
