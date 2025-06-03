@@ -35,6 +35,18 @@
       <div class="cart-buttons">
         <button class="clear-cart-btn">Vider</button>
         <button class="order-btn">Commander</button>
+        <style>
+  /* Transition pour le slide des sous-catégories */
+  .subcategories-slide {
+    transition: transform 0.3s ease-out;
+  }
+  
+  /* Style pour l'indicateur de sous-catégories */
+  .has-sub {
+    margin-left: 5px;
+    font-weight: bold;
+  }
+</style>
       </div>
     </div>
   </div>
@@ -45,14 +57,19 @@
     <button class="close-details">&times;</button>
   </div>
 
-  <!-- Catégories supplémentaires -->
-  <div class="categories-slide" id="categoriesSlide">
-    <div class="categories-slide-content">
-      <h3>Toutes les catégories</h3>
-      <div class="categories-grid" id="allCategories"></div>
-      <button class="close-categories">&times;</button>
+ <!-- Dans la section des catégories supplémentaires -->
+<div class="categories-slide" id="categoriesSlide">
+  <div class="categories-slide-content">
+    <h3>Toutes les catégories</h3>
+    <div class="categories-grid" id="allCategories"></div>
+    <div class="subcategories-slide" id="subcategoriesSlide">
+      <button class="back-to-categories">&larr; Retour</button>
+      <h3 id="subcategoryTitle"></h3>
+      <div class="subcategories-grid" id="subcategoriesGrid"></div>
     </div>
+    <button class="close-categories">&times;</button>
   </div>
+</div>
 
   <!-- Contenu Principal -->
   <div class="main-container">
@@ -83,7 +100,7 @@
 
     <div class="product-grid" id="productGrid">
       <!-- Produits chargés dynamiquement -->
-    </div>
+    </div ="category-sections" id="categorySections">
   </div>
 
   <!-- Notification -->
