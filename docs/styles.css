@@ -878,7 +878,7 @@ body.modal-open .overlay {
   .cart-sidebar, 
   .product-details-slide, 
   .categories-slide {
-    width: 100%;
+    width: 80%;
     max-width: 100%;
   }
 
@@ -1013,7 +1013,7 @@ body.modal-open .overlay {
 
 @media (max-width: 480px) {
   .categories-slide {
-    width: 100%;
+    width: 80%;
     padding: 1rem;
   }
   
