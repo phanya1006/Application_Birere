@@ -14,6 +14,16 @@ const config = {
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', initApp);
+document.querySelector('.category-btn[data-category="all"]').addEventListener('click', () => {
+  resetFilters();
+});
+document.querySelector('.back-to-categories').addEventListener('click', () => {
+  document.getElementById('subcategoriesSlide').classList.remove('active');
+  // Réinitialiser le filtre si nécessaire
+  if (!document.querySelector('.category-btn.active')) {
+    resetFilters();
+  }
+});
 
 async function initApp() {
   await loadProducts();
@@ -54,27 +64,163 @@ function extractCategories() {
   return Array.from(categories);
 }
 
+// Dans la fonction renderAllCategories
 function renderAllCategories() {
   const container = document.getElementById('allCategories');
   container.innerHTML = '';
   
   const categories = extractCategories();
   categories.forEach(category => {
+    const productsInCategory = config.products.filter(p => p.category === category);
+    const hasSubcategories = productsInCategory.some(p => p.subcategory);
+    
     const btn = document.createElement('button');
     btn.className = 'category-btn';
-    btn.textContent = category;
+    btn.innerHTML = `
+      ${category}
+      ${hasSubcategories ? '<span class="has-sub">›</span>' : ''}
+    `;
     btn.dataset.category = category;
+    
     btn.addEventListener('click', () => {
-      filterByCategory(category);
-      document.getElementById('categoriesSlide').classList.remove('open');
-      updateModalState();
-      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-      const mainBtn = document.querySelector(`.category-btn[data-category="${category}"]`);
-      if (mainBtn) mainBtn.classList.add('active');
+      if (hasSubcategories) {
+        showSubcategories(category, productsInCategory);
+      } else {
+        filterByCategory(category);
+        document.getElementById('categoriesSlide').classList.remove('open');
+        updateModalState();
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+        const mainBtn = document.querySelector(`.category-btn[data-category="${category}"]`);
+        if (mainBtn) mainBtn.classList.add('active');
+      }
     });
+    
     container.appendChild(btn);
   });
 }
+
+// Modifiez la fonction showSubcategories comme suit :
+function showSubcategories(category, products) {
+  const subcategories = [...new Set(products.map(p => p.subcategory).filter(Boolean))];
+  const container = document.getElementById('subcategoriesGrid');
+  const title = document.getElementById('subcategoryTitle');
+  
+  container.innerHTML = '';
+  title.textContent = category;
+  
+  if (subcategories.length > 0) {
+    subcategories.forEach(sub => {
+      const productsInSub = products.filter(p => p.subcategory === sub);
+      const card = document.createElement('div');
+      card.className = 'subcategory-card';
+      card.dataset.category = category;
+      card.dataset.subcategory = sub;
+      
+      const imgSrc = productsInSub[0]?.image || 'https://via.placeholder.com/150';
+      
+      card.innerHTML = `
+        <img src="${imgSrc}" alt="${sub}" loading="lazy">
+        <h4>${sub}</h4>
+      `;
+      
+      card.addEventListener('click', () => {
+        filterProductsBySubcategory(category, sub);
+        document.getElementById('categoriesSlide').classList.remove('open');
+        updateModalState();
+      });
+      
+      container.appendChild(card);
+    });
+  } else {
+    // Fallback si pas de sous-catégories
+    const card = document.createElement('div');
+    card.className = 'subcategory-card';
+    card.innerHTML = `
+      <img src="${products[0]?.image || 'https://via.placeholder.com/150'}" alt="${category}" loading="lazy">
+      <h4>Voir tous</h4>
+    `;
+    card.addEventListener('click', () => {
+      filterByCategory(category);
+      document.getElementById('categoriesSlide').classList.remove('open');
+      updateModalState();
+    });
+    container.appendChild(card);
+  }
+  
+  document.getElementById('subcategoriesSlide').classList.add('active');
+}
+
+// Nouvelle fonction pour filtrer les produits
+function filterProductsBySubcategory(category, subcategory) {
+  const productGrid = document.getElementById('productGrid');
+  productGrid.innerHTML = '';
+  
+  const filteredProducts = config.products.filter(p => 
+    p.category === category && 
+    (p.subcategory === subcategory || !subcategory)
+  );
+  
+  if (filteredProducts.length === 0) {
+    productGrid.innerHTML = '<p class="no-products">Aucun produit dans cette sous-catégorie</p>';
+    return;
+  }
+  
+  filteredProducts.forEach(product => {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.dataset.name = product.name.toLowerCase();
+    card.dataset.category = product.category;
+    card.dataset.subcategory = product.subcategory || '';
+    card.dataset.id = product.id;
+    
+    card.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" loading="lazy">
+      <div class="product-info">
+        <h3>${product.name}</h3>
+        <div class="price">${product.price} USD</div>
+        ${product.rating ? `
+        <div class="rating">
+          ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
+          <span>(${product.reviews || 0})</span>
+        </div>` : ''}
+      </div>
+      <div class="product-actions">
+        <button class="order-btn">Commander</button>
+        <button class="add-cart-btn">Ajouter</button>
+      </div>
+    `;
+    
+    card.querySelector('img').addEventListener('click', () => showProductDetails(product.id));
+    card.querySelector('.order-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
+    });
+    card.querySelector('.add-cart-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      addToCart(product);
+    });
+    
+    productGrid.appendChild(card);
+  });
+}
+// Nouvelle fonction pour filtrer par sous-catégorie
+function filterBySubcategory(category, subcategory) {
+  document.querySelectorAll('.product-card').forEach(card => {
+    const matches = card.dataset.category === category && 
+                   (card.dataset.subcategory === subcategory || 
+                    !subcategory);
+    card.style.display = matches ? 'block' : 'none';
+  });
+  
+  document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+  const mainBtn = document.querySelector(`.category-btn[data-category="${category}"]`);
+  if (mainBtn) mainBtn.classList.add('active');
+}
+
+// Dans initEventListeners, ajouter :
+document.querySelector('.back-to-categories').addEventListener('click', () => {
+  document.getElementById('subcategoriesSlide').classList.remove('active');
+});
 
 function renderProducts() {
   const grid = document.getElementById('productGrid');
@@ -134,12 +280,14 @@ function addToCart(product, options = {}) {
     options,
     quantity,
     cartId: `${product.id}-${Date.now()}`,
-    addedAt: new Date().toISOString()
+    addedAt: new Date().toISOString(),
+    selectedImage: config.uiState.selectedImage || product.image // Sauvegarde l'image sélectionnée
   };
- 
+
   const existingIndex = config.cart.findIndex(item => 
     item.id === product.id && 
-    JSON.stringify(item.options) === JSON.stringify(options)
+    JSON.stringify(item.options) === JSON.stringify(options) &&
+    item.selectedImage === cartItem.selectedImage // Ajoute cette comparaison
   );
 
   if (existingIndex >= 0) {
@@ -185,8 +333,11 @@ function displayCart() {
         .join('')}</div>`;
     }
     
+    // Utiliser item.selectedImage si elle existe, sinon l'image par défaut
+    const displayImage = item.selectedImage || item.image;
+    
     li.innerHTML = `
-      <img src="${item.image}" alt="${item.name}" loading="lazy">
+      <img src="${displayImage}" alt="${item.name}" loading="lazy">
       <div class="cart-item-info">
         <h4>${item.name} <span class="item-qty">×${item.quantity}</span></h4>
         <div class="price">${(parseFloat(item.price) * item.quantity)} USD</div>
@@ -226,7 +377,7 @@ function orderCart() {
     alert("Votre panier est vide.");
     return;
   }
- 
+
   let message = "Bonjour, je souhaite commander :\n";
   config.cart.forEach(item => {
     message += `- ${item.name} (${item.price} USD)`;
@@ -236,36 +387,77 @@ function orderCart() {
         .map(([key, val]) => `${key}: ${val}`)
         .join(', ')}]`;
     }
+    // Ajouter le lien de l'image sélectionnée
+    if (item.selectedImage) {
+      message += `\nImage: ${item.selectedImage}`;
+    }
     message += `\n`;
   });
- 
+
   const total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
   message += `\nTotal: ${total.toFixed(2)} USD`;
- 
+
   openWhatsApp(message);
 }
 
-/* ========== FICHE PRODUIT DÉTAILLÉE ========== */
+function addToCart(product, options = {}) {
+  const quantity = options.quantity || 1;
+  
+  // Garantie que l'image vient bien du produit courant
+  const selectedImage = config.uiState.selectedProduct?.id === product.id 
+    ? config.uiState.selectedImage 
+    : product.image;
 
+  const cartItem = {
+    ...product,
+    options,
+    quantity,
+    cartId: `${product.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    addedAt: new Date().toISOString(),
+    selectedImage: selectedImage
+  };
+
+  // Vérifie si l'article existe déjà (même ID, mêmes options et même image)
+  const existingIndex = config.cart.findIndex(item => 
+    item.id === product.id && 
+    JSON.stringify(item.options) === JSON.stringify(options) &&
+    item.selectedImage === selectedImage
+  );
+
+  if (existingIndex >= 0) {
+    config.cart[existingIndex].quantity += quantity;
+  } else {
+    config.cart.push(cartItem);
+  }
+  
+  updateCartUI();
+  showNotification(`${product.name} ajouté au panier`);
+}
+/* ========== FICHE PRODUIT DÉTAILLÉE ========== */
 function showProductDetails(productId) {
   const product = config.products.find(p => p.id === productId);
   if (!product) return;
 
-  config.uiState.detailsOpen = true;
-  config.uiState.selectedProduct = product;
-  config.uiState.selectedOptions = {};
+  // Réinitialisation complète de l'état
+  config.uiState = {
+    detailsOpen: true,
+    selectedProduct: product,
+    selectedOptions: {},
+    selectedImage: product.image // Toujours partir de l'image par défaut
+  };
+  
   updateModalState();
- 
+
   document.getElementById('detailsContent').innerHTML = `
     <div class="product-gallery">
       <div class="main-image">
-        <img src="${product.image}" alt="${product.name}" loading="lazy">
+        <img src="${product.image}" alt="${product.name}" loading="lazy" id="mainProductImage">
       </div>
-      ${product.images ? `
+      ${product.images && product.images.length > 0 ? `
       <div class="thumbnail-container">
-        ${product.images.map(img => `
-          <div class="thumbnail">
-            <img src="${img}" alt="${product.name}">
+        ${[product.image, ...product.images].map((img, index) => `
+          <div class="thumbnail ${index === 0 ? 'selected' : ''}" data-image="${img}">
+            <img src="${img}" alt="${product.name}" loading="lazy">
           </div>
         `).join('')}
       </div>` : ''}
@@ -329,6 +521,7 @@ function showProductDetails(productId) {
   document.querySelector('.qty-btn.minus').addEventListener('click', () => {
     if (parseInt(qtyInput.value) > 1) qtyInput.value = parseInt(qtyInput.value) - 1;
   });
+  
   document.querySelector('.qty-btn.plus').addEventListener('click', () => {
     qtyInput.value = parseInt(qtyInput.value) + 1;
   });
@@ -362,10 +555,15 @@ function showProductDetails(productId) {
   }
 
   // Gestion des thumbnails
-  if (product.images) {
-    document.querySelectorAll('.thumbnail img').forEach((thumb, index) => {
-      thumb.addEventListener('click', () => {
-        document.querySelector('.main-image img').src = product.images[index];
+  if (product.images && product.images.length > 0) {
+    document.querySelectorAll('.thumbnail').forEach((thumb) => {
+      thumb.addEventListener('click', function() {
+        const imgUrl = this.dataset.image;
+        document.getElementById('mainProductImage').src = imgUrl;
+        config.uiState.selectedImage = imgUrl;
+        
+        document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('selected'));
+        this.classList.add('selected');
       });
     });
   }
@@ -377,6 +575,7 @@ function closeProductDetails() {
   config.uiState.detailsOpen = false;
   config.uiState.selectedProduct = null;
   config.uiState.selectedOptions = {};
+  config.uiState.selectedImage= null;
   updateModalState();
   document.getElementById('productDetailsSlide').classList.remove('open');
 }
@@ -396,11 +595,61 @@ function filterProducts() {
 }
 
 function filterByCategory(category) {
-  document.querySelectorAll('.product-card').forEach(card => {
-    card.style.display = (category === 'all' || card.dataset.category === category) 
-      ? 'block' 
-      : 'none';
+  // Réinitialiser complètement l'affichage
+  if (category === 'all') {
+    renderProducts(); // Réaffiche tous les produits
+    return;
+  }
+
+  const productGrid = document.getElementById('productGrid');
+  productGrid.innerHTML = '';
+
+  const filteredProducts = config.products.filter(p => p.category === category);
+  
+  if (filteredProducts.length === 0) {
+    productGrid.innerHTML = '<p class="no-products">Aucun produit dans cette catégorie</p>';
+    return;
+  }
+
+  filteredProducts.forEach(product => {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.dataset.name = product.name.toLowerCase();
+    card.dataset.category = product.category;
+    card.dataset.subcategory = product.subcategory || '';
+    card.dataset.id = product.id;
+    
+    card.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" loading="lazy">
+      <div class="product-info">
+        <h3>${product.name}</h3>
+        <div class="price">${product.price} USD</div>
+        ${product.rating ? `
+        <div class="rating">
+          ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
+          <span>(${product.reviews || 0})</span>
+        </div>` : ''}
+      </div>
+      <div class="product-actions">
+        <button class="order-btn">Commander</button>
+        <button class="add-cart-btn">Ajouter</button>
+      </div>
+    `;
+    
+    // Ajoutez les écouteurs d'événements comme avant...
+    productGrid.appendChild(card);
   });
+}
+function resetFilters() {
+  // Réinitialise tous les filtres et réaffiche tous les produits
+  document.getElementById('searchInput').value = '';
+  renderProducts();
+  
+  // Réinitialise l'état actif des boutons
+  document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  document.querySelector('.category-btn[data-category="all"]').classList.add('active');
 }
 
 function updateModalState() {
