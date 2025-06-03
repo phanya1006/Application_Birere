@@ -878,8 +878,7 @@ body.modal-open .overlay {
   .cart-sidebar, 
   .product-details-slide, 
   .categories-slide {
-    width: 80%;
-    height: auto;
+    width: 85%;
     max-width: 100%;
   }
 
