@@ -1070,24 +1070,3 @@ body.modal-open .overlay {
   border-radius: 8px;
   border: 1px solid var(--border);
 }
-@media (max-width: 768px) {
-  .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-  
-  .product-card {
-    grid-row-end: span 30; /* Plus court sur mobile */
-  }
-}
-.product-card {
-  background: var(--card-bg);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-}
