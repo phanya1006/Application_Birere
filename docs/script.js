@@ -353,6 +353,50 @@ function displayCart() {
   const total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
   document.getElementById('cartTotal').textContent = `${total.toFixed(2)} USD`;
 }
+function renderProductCards(products) {
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = '';
+
+  products.forEach(product => {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.dataset.id = product.id;
+    card.dataset.category = product.category;
+    card.dataset.subcategory = product.subcategory || 'none';
+
+    card.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" loading="lazy">
+      <div class="product-info">
+        <h3>${product.name}</h3>
+        <div class="price">${product.price} USD</div>
+        ${product.rating ? `
+        <div class="rating">
+          ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
+          <span>(${product.reviews || 0})</span>
+        </div>` : ''}
+      </div>
+      <div class="product-actions">
+        <button class="order-btn">Commander</button>
+        <button class="add-cart-btn">Ajouter</button>
+      </div>
+    `;
+
+    // Événement délégué parent
+    card.addEventListener('click', function(e) {
+      if (e.target.classList.contains('order-btn')) {
+        e.stopPropagation();
+        openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
+      } else if (e.target.classList.contains('add-cart-btn')) {
+        e.stopPropagation();
+        addToCart(product);
+      } else {
+        showProductDetails(product.id);
+      }
+    });
+
+    grid.appendChild(card);
+  });
+}
 
 function removeFromCart(cartId) {
   config.cart = config.cart.filter(item => item.cartId !== cartId);
@@ -595,50 +639,39 @@ function filterProducts() {
 }
 
 function filterByCategory(category) {
-  // Réinitialiser complètement l'affichage
-  if (category === 'all') {
-    renderProducts(); // Réaffiche tous les produits
-    return;
-  }
+  // Réinitialise toujours les options sélectionnées
+  config.uiState = {
+    ...config.uiState,
+    selectedOptions: {},
+    selectedImage: null
+  };
 
   const productGrid = document.getElementById('productGrid');
   productGrid.innerHTML = '';
 
-  const filteredProducts = config.products.filter(p => p.category === category);
-  
+  // Filtrage intelligent qui conserve les sous-catégories
+  const filteredProducts = category === 'all' 
+    ? config.products 
+    : config.products.filter(p => {
+        const matchesCategory = p.category === category;
+        const matchesSubcategory = !config.uiState.currentSubcategory || 
+                                 p.subcategory === config.uiState.currentSubcategory;
+        return matchesCategory && matchesSubcategory;
+      });
+
   if (filteredProducts.length === 0) {
-    productGrid.innerHTML = '<p class="no-products">Aucun produit dans cette catégorie</p>';
+    productGrid.innerHTML = `
+      <div class="no-products">
+        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="Aucun produit">
+        <p>Aucun produit trouvé</p>
+        <button onclick="resetFilters()" class="reset-btn">Réinitialiser</button>
+      </div>
+    `;
     return;
   }
 
-  filteredProducts.forEach(product => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.dataset.name = product.name.toLowerCase();
-    card.dataset.category = product.category;
-    card.dataset.subcategory = product.subcategory || '';
-    card.dataset.id = product.id;
-    
-    card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" loading="lazy">
-      <div class="product-info">
-        <h3>${product.name}</h3>
-        <div class="price">${product.price} USD</div>
-        ${product.rating ? `
-        <div class="rating">
-          ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
-          <span>(${product.reviews || 0})</span>
-        </div>` : ''}
-      </div>
-      <div class="product-actions">
-        <button class="order-btn">Commander</button>
-        <button class="add-cart-btn">Ajouter</button>
-      </div>
-    `;
-    
-    // Ajoutez les écouteurs d'événements comme avant...
-    productGrid.appendChild(card);
-  });
+  // Utilisation de la fonction renderProducts améliorée
+  renderProductCards(filteredProducts);
 }
 function resetFilters() {
   // Réinitialise tous les filtres et réaffiche tous les produits
