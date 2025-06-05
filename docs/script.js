@@ -226,7 +226,10 @@ function renderProducts() {
   const grid = document.getElementById('productGrid');
   grid.innerHTML = '';
 
-  config.products.forEach((product, index) => {
+  // Crée une copie du tableau et le mélange aléatoirement
+  const shuffledProducts = [...config.products].sort(() => Math.random() - 0.5);
+
+  shuffledProducts.forEach((product, index) => {
     const card = document.createElement('div');
     card.className = 'product-card';
     card.dataset.name = product.name.toLowerCase();
@@ -639,25 +642,14 @@ function filterProducts() {
 }
 
 function filterByCategory(category) {
-  // Réinitialise toujours les options sélectionnées
-  config.uiState = {
-    ...config.uiState,
-    selectedOptions: {},
-    selectedImage: null
-  };
-
   const productGrid = document.getElementById('productGrid');
   productGrid.innerHTML = '';
 
-  // Filtrage intelligent qui conserve les sous-catégories
-  const filteredProducts = category === 'all' 
-    ? config.products 
-    : config.products.filter(p => {
-        const matchesCategory = p.category === category;
-        const matchesSubcategory = !config.uiState.currentSubcategory || 
-                                 p.subcategory === config.uiState.currentSubcategory;
-        return matchesCategory && matchesSubcategory;
-      });
+  // Filtre les produits puis les mélange aléatoirement
+  const filteredProducts = (category === 'all' 
+    ? [...config.products] 
+    : config.products.filter(p => p.category === category))
+    .sort(() => Math.random() - 0.5);
 
   if (filteredProducts.length === 0) {
     productGrid.innerHTML = `
@@ -670,8 +662,44 @@ function filterByCategory(category) {
     return;
   }
 
-  // Utilisation de la fonction renderProducts améliorée
-  renderProductCards(filteredProducts);
+  filteredProducts.forEach(product => {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.dataset.id = product.id;
+    card.dataset.category = product.category;
+    card.dataset.subcategory = product.subcategory || 'none';
+
+    card.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" loading="lazy">
+      <div class="product-info">
+        <h3>${product.name}</h3>
+        <div class="price">${product.price} USD</div>
+        ${product.rating ? `
+        <div class="rating">
+          ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
+          <span>(${product.reviews || 0})</span>
+        </div>` : ''}
+      </div>
+      <div class="product-actions">
+        <button class="order-btn">Commander</button>
+        <button class="add-cart-btn">Ajouter</button>
+      </div>
+    `;
+
+    card.addEventListener('click', function(e) {
+      if (e.target.classList.contains('order-btn')) {
+        e.stopPropagation();
+        openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
+      } else if (e.target.classList.contains('add-cart-btn')) {
+        e.stopPropagation();
+        addToCart(product);
+      } else {
+        showProductDetails(product.id);
+      }
+    });
+
+    productGrid.appendChild(card);
+  });
 }
 function resetFilters() {
   // Réinitialise tous les filtres et réaffiche tous les produits
