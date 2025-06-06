@@ -1070,3 +1070,259 @@ body.modal-open .overlay {
   border-radius: 8px;
   border: 1px solid var(--border);
 }
+/* ============ MASONRY LAYOUT SIMILAIRE À PINTEREST ============ */
+
+/* Supprimez l'ancien .product-grid et remplacez par ceci */
+.product-grid {
+  columns: 3 300px;
+  column-gap: 15px;
+  padding: 15px;
+}
+
+.product-card {
+  break-inside: avoid;
+  margin-bottom: 15px;
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border);
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+}
+
+/* Effet de survol plus prononcé */
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px var(--shadow-color);
+}
+
+/* Images en plein largeur avec hauteur automatique */
+.product-card img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  border-bottom: 1px solid var(--border);
+  cursor: zoom-in;
+}
+
+/* Style Pinterest pour les infos produits */
+.product-info {
+  padding: 12px;
+}
+
+.product-card h3 {
+  font-size: 1rem;
+  margin-bottom: 6px;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.price {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 6px 0;
+}
+
+.rating {
+  color: var(--primary-light);
+  font-size: 0.9rem;
+  margin: 6px 0;
+}
+
+/* Boutons plus discrets en bas de carte */
+.product-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.order-btn, .add-cart-btn {
+  padding: 8px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Animation d'apparition */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ HEADER PINTEREST-LIKE ============ */
+header {
+  text-align: center;
+  padding: 1rem 0;
+  margin-bottom: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+h1 {
+  font-size: 1.8rem;
+  color: var(--primary);
+  margin-bottom: 0.3rem;
+}
+
+.tagline {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.header-decoration {
+  display: none; /* On retire la décoration pour plus de minimalisme */
+}
+
+/* ============ BARRE DE RECHERCHE MINIMALISTE ============ */
+.search-container {
+  max-width: 600px;
+  margin: 0 auto 1rem;
+  padding: 0 15px;
+}
+
+.search-bar {
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar input {
+  padding: 12px 20px;
+  font-size: 0.95rem;
+}
+
+/* ============ CATÉGORIES HORIZONTALES SCROLLABLES ============ */
+.categories {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px 15px;
+  gap: 8px;
+  margin-bottom: 1rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Pour Firefox */
+}
+
+.categories::-webkit-scrollbar {
+  display: none; /* Pour Chrome/Safari */
+}
+
+.category-btn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 18px;
+  font-size: 0.9rem;
+}
+
+/* ============ ADAPTATION MOBILE ============ */
+@media (max-width: 768px) {
+  .product-grid {
+    columns: 2 200px;
+    padding: 10px;
+  }
+  
+  .product-card {
+    border-radius: 12px;
+  }
+  
+  .product-actions {
+    flex-direction: column;
+  }
+  
+  header {
+    padding: 0.8rem 0;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    columns: 1 300px;
+  }
+  
+  .search-bar input {
+    padding: 10px 15px;
+  }
+}
+@media (max-width: 767px) {
+  .product-card {
+    aspect-ratio: 0.8; /* Ratio hauteur/largeur (ajustez selon vos besoins) */
+  }
+  
+  .product-card img {
+    height: auto;
+    aspect-ratio: 1; /* Images carrées */
+  }
+}
+/* ============ AFFICHAGE MOBILE - 2 PRODUITS PAR LIGNE ============ */
+@media (max-width: 767px) {
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 colonnes */
+    gap: 12px; /* Espace entre les produits */
+    padding: 10px;
+    columns: 1; /* Désactive le masonry pour mobile */
+  }
+
+  .product-card {
+    margin-bottom: 0; /* Retire la marge bottom car gérée par le gap */
+    width: 100%; /* Prend toute la largeur disponible */
+    break-inside: auto; /* Important pour le grid layout */
+  }
+
+  .product-card img {
+    height: 180px; /* Hauteur fixe pour uniformiser */
+    max-height: none; /* Annule le max-height précédent */
+  }
+
+  .product-info {
+    padding: 10px;
+  }
+
+  .product-card h3 {
+    font-size: 0.9rem; /* Texte légèrement plus petit */
+    margin-bottom: 4px;
+  }
+
+  .price {
+    font-size: 1rem;
+  }
+
+  .product-actions {
+    padding: 0 10px 10px;
+    flex-direction: row; /* Boutons côte à côte */
+  }
+
+  .order-btn, 
+  .add-cart-btn {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+    flex: 1; /* Les boutons prennent la même largeur */
+  }
+}
+
+/* Pour les très petits écrans (moins de 360px) */
+@media (max-width: 359px) {
+  .product-grid {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .product-card img {
+    height: 150px;
+  }
+
+  .product-actions {
+    flex-direction: column; /* Boutons empilés sur très petits écrans */
+    gap: 5px;
+  }
+}
