@@ -110,13 +110,12 @@ function showSubcategories(category, products) {
   
   if (subcategories.length > 0) {
     subcategories.forEach(sub => {
-      const productsInSub = products.filter(p => p.subcategory === sub);
       const card = document.createElement('div');
       card.className = 'subcategory-card';
       card.dataset.category = category;
       card.dataset.subcategory = sub;
       
-      const imgSrc = productsInSub[0]?.image || 'https://via.placeholder.com/150';
+      const imgSrc = products.find(p => p.subcategory === sub)?.image || 'https://via.placeholder.com/150';
       
       card.innerHTML = `
         <img src="${imgSrc}" alt="${sub}" loading="lazy">
@@ -132,15 +131,15 @@ function showSubcategories(category, products) {
       container.appendChild(card);
     });
   } else {
-    // Fallback si pas de sous-catégories
     const card = document.createElement('div');
     card.className = 'subcategory-card';
+    const imgSrc = products[0]?.image || 'https://via.placeholder.com/150';
     card.innerHTML = `
-      <img src="${products[0]?.image || 'https://via.placeholder.com/150'}" alt="${category}" loading="lazy">
+      <img src="${imgSrc}" alt="${category}" loading="lazy">
       <h4>Voir tous</h4>
     `;
     card.addEventListener('click', () => {
-      filterByCategory(category);
+      filterProductsBySubcategory(category, '');
       document.getElementById('categoriesSlide').classList.remove('open');
       updateModalState();
     });
@@ -150,59 +149,34 @@ function showSubcategories(category, products) {
   document.getElementById('subcategoriesSlide').classList.add('active');
 }
 
-// Nouvelle fonction pour filtrer les produits
 function filterProductsBySubcategory(category, subcategory) {
-  const productGrid = document.getElementById('productGrid');
-  productGrid.innerHTML = '';
-  
-  const filteredProducts = config.products.filter(p => 
+  const container = document.getElementById('categorySections');
+  container.innerHTML = '';
+
+  const products = config.products.filter(p => 
     p.category === category && 
     (p.subcategory === subcategory || !subcategory)
   );
-  
-  if (filteredProducts.length === 0) {
-    productGrid.innerHTML = '<p class="no-products">Aucun produit dans cette sous-catégorie</p>';
+
+  if (products.length === 0) {
+    container.innerHTML = '<p class="no-products">Aucun produit dans cette sous-catégorie</p>';
     return;
   }
+
+  // Créer une grille verticale pour les sous-catégories
+  const grid = document.createElement('div');
+  grid.className = 'product-grid vertical-scroll';
+  grid.id = 'productGrid';
   
-  filteredProducts.forEach(product => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.dataset.name = product.name.toLowerCase();
-    card.dataset.category = product.category;
-    card.dataset.subcategory = product.subcategory || '';
-    card.dataset.id = product.id;
-    
-    card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" loading="lazy">
-      <div class="product-info">
-        <h3>${product.name}</h3>
-        <div class="price">${product.price} USD</div>
-        ${product.rating ? `
-        <div class="rating">
-          ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
-          <span>(${product.reviews || 0})</span>
-        </div>` : ''}
-      </div>
-      <div class="product-actions">
-        <button class="order-btn">Commander</button>
-        <button class="add-cart-btn">Ajouter</button>
-      </div>
-    `;
-    
-    card.querySelector('img').addEventListener('click', () => showProductDetails(product.id));
-    card.querySelector('.order-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
-    });
-    card.querySelector('.add-cart-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      addToCart(product);
-    });
-    
-    productGrid.appendChild(card);
+  products.forEach(product => {
+    grid.appendChild(createProductCard(product));
   });
+  
+  container.appendChild(grid);
+
+  updateActiveCategoryButton(category);
 }
+
 // Nouvelle fonction pour filtrer par sous-catégorie
 function filterBySubcategory(category, subcategory) {
   document.querySelectorAll('.product-card').forEach(card => {
@@ -225,6 +199,18 @@ document.querySelector('.back-to-categories').addEventListener('click', () => {
 function renderProducts() {
   const grid = document.getElementById('productGrid');
   grid.innerHTML = '';
+  // Mélanger aléatoirement l'ordre des catégories
+  const categories = [...new Set(config.products.map(p => p.category))];
+  const shuffledCategories = shuffleArray(categories);
+
+  shuffledCategories.forEach(category => {
+    const products = config.products.filter(p => p.category === category);
+    // Mélanger les produits dans chaque catégorie
+    const shuffledProducts = shuffleArray(products);
+    
+    const section = createCategorySection(category, shuffledProducts);
+    container.appendChild(section);
+  });
 
   // Crée une copie du tableau et le mélange aléatoirement
   const shuffledProducts = [...config.products].sort(() => Math.random() - 0.5);
@@ -356,51 +342,92 @@ function displayCart() {
   const total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
   document.getElementById('cartTotal').textContent = `${total.toFixed(2)} USD`;
 }
-function renderProductCards(products) {
-  const grid = document.getElementById('productGrid');
-  grid.innerHTML = '';
+// Nouvelle fonction pour afficher les produits par catégorie
+function renderProducts() {
+  const container = document.getElementById('categorySections');
+  container.innerHTML = '';
 
-  products.forEach(product => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.dataset.id = product.id;
-    card.dataset.category = product.category;
-    card.dataset.subcategory = product.subcategory || 'none';
+  // Grouper les produits par catégorie
+  const categories = [...new Set(config.products.map(p => p.category))];
 
-    card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" loading="lazy">
-      <div class="product-info">
-        <h3>${product.name}</h3>
-        <div class="price">${product.price} USD</div>
-        ${product.rating ? `
-        <div class="rating">
-          ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
-          <span>(${product.reviews || 0})</span>
-        </div>` : ''}
-      </div>
-      <div class="product-actions">
-        <button class="order-btn">Commander</button>
-        <button class="add-cart-btn">Ajouter</button>
-      </div>
-    `;
-
-    // Événement délégué parent
-    card.addEventListener('click', function(e) {
-      if (e.target.classList.contains('order-btn')) {
-        e.stopPropagation();
-        openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
-      } else if (e.target.classList.contains('add-cart-btn')) {
-        e.stopPropagation();
-        addToCart(product);
-      } else {
-        showProductDetails(product.id);
-      }
+  categories.forEach(category => {
+    const products = config.products.filter(p => p.category === category);
+    
+    // Créer la section de catégorie
+    const section = document.createElement('div');
+    section.className = 'category-section';
+    
+    // Ajouter le titre
+    const title = document.createElement('h3');
+    title.className = 'category-title';
+    title.textContent = category;
+    section.appendChild(title);
+    
+    // Créer le conteneur scrollable
+    const scrollContainer = document.createElement('div');
+    scrollContainer.className = 'product-scroll-container';
+    
+    // Ajouter les produits
+    products.forEach(product => {
+      const card = createProductCard(product);
+      scrollContainer.appendChild(card);
     });
-
-    grid.appendChild(card);
+    
+    section.appendChild(scrollContainer);
+    container.appendChild(section);
   });
 }
+// Nouvelle fonction pour grouper les produits par catégorie
+function groupProductsByCategory() {
+  const categories = {};
+  
+  config.products.forEach(product => {
+    if (!categories[product.category]) {
+      categories[product.category] = [];
+    }
+    categories[product.category].push(product);
+  });
+  
+  return categories;
+}
 
+// Fonction helper pour créer une carte produit
+function createProductCard(product) {
+  const card = document.createElement('div');
+  card.className = 'product-card';
+  card.dataset.name = product.name.toLowerCase();
+  card.dataset.category = product.category;
+  card.dataset.id = product.id;
+  
+  card.innerHTML = `
+    <img src="${product.image}" alt="${product.name}" loading="lazy">
+    <div class="product-info">
+      <h3>${product.name}</h3>
+      <div class="price">${product.price} USD</div>
+      ${product.rating ? `
+      <div class="rating">
+        ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
+        <span>(${product.reviews || 0})</span>
+      </div>` : ''}
+    </div>
+    <div class="product-actions">
+      <button class="order-btn">Commander</button>
+      <button class="add-cart-btn">Ajouter</button>
+    </div>
+  `;
+  
+  card.querySelector('img').addEventListener('click', () => showProductDetails(product.id));
+  card.querySelector('.order-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
+  });
+  card.querySelector('.add-cart-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    addToCart(product);
+  });
+
+  return card;
+}
 function removeFromCart(cartId) {
   config.cart = config.cart.filter(item => item.cartId !== cartId);
   updateCartUI();
@@ -635,84 +662,76 @@ function openWhatsApp(message) {
 
 function filterProducts() {
   const input = document.getElementById('searchInput').value.toLowerCase();
-  document.querySelectorAll('.product-card').forEach(card => {
-    const matches = card.dataset.name.includes(input);
-    card.style.display = matches ? 'block' : 'none';
-  });
-}
+  const container = document.getElementById('categorySections');
+  container.innerHTML = '';
 
-function filterByCategory(category) {
-  const productGrid = document.getElementById('productGrid');
-  productGrid.innerHTML = '';
+  const filteredProducts = config.products.filter(p => 
+    p.name.toLowerCase().includes(input) || 
+    p.description.toLowerCase().includes(input) ||
+    p.category.toLowerCase().includes(input) ||
+    (p.subcategory && p.subcategory.toLowerCase().includes(input))
+  );
 
-  // Filtre les produits puis les mélange aléatoirement
-  const filteredProducts = (category === 'all' 
-    ? [...config.products] 
-    : config.products.filter(p => p.category === category))
-    .sort(() => Math.random() - 0.5);
-
-  if (filteredProducts.length === 0) {
-    productGrid.innerHTML = `
-      <div class="no-products">
-        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="Aucun produit">
-        <p>Aucun produit trouvé</p>
-        <button onclick="resetFilters()" class="reset-btn">Réinitialiser</button>
-      </div>
-    `;
+  if (input.trim() === '') {
+    renderProducts(); // Affiche tout si la recherche est vide
     return;
   }
 
+  if (filteredProducts.length === 0) {
+    container.innerHTML = '<p class="no-products">Aucun résultat trouvé pour "' + input + '"</p>';
+    return;
+  }
+
+  // Créer une grille verticale pour les résultats de recherche
+  const grid = document.createElement('div');
+  grid.className = 'product-grid vertical-scroll';
+  
   filteredProducts.forEach(product => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.dataset.id = product.id;
-    card.dataset.category = product.category;
-    card.dataset.subcategory = product.subcategory || 'none';
-
-    card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" loading="lazy">
-      <div class="product-info">
-        <h3>${product.name}</h3>
-        <div class="price">${product.price} USD</div>
-        ${product.rating ? `
-        <div class="rating">
-          ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
-          <span>(${product.reviews || 0})</span>
-        </div>` : ''}
-      </div>
-      <div class="product-actions">
-        <button class="order-btn">Commander</button>
-        <button class="add-cart-btn">Ajouter</button>
-      </div>
-    `;
-
-    card.addEventListener('click', function(e) {
-      if (e.target.classList.contains('order-btn')) {
-        e.stopPropagation();
-        openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
-      } else if (e.target.classList.contains('add-cart-btn')) {
-        e.stopPropagation();
-        addToCart(product);
-      } else {
-        showProductDetails(product.id);
-      }
-    });
-
-    productGrid.appendChild(card);
+    grid.appendChild(createProductCard(product));
   });
+  
+  container.appendChild(grid);
+}
+
+// Modifier filterByCategory pour utiliser la même structure
+function filterByCategory(category) {
+  const container = document.getElementById('categorySections');
+  container.innerHTML = '';
+  
+  if (category === 'all') {
+    renderProducts(); // Garde le scroll horizontal pour "Tous"
+    return;
+  }
+
+  const products = config.products.filter(p => p.category === category);
+  
+  if (products.length === 0) {
+    container.innerHTML = '<p class="no-products">Aucun produit dans cette catégorie</p>';
+    return;
+  }
+
+  // Pour les autres catégories, on utilise une grille verticale normale
+  const grid = document.createElement('div');
+  grid.className = 'product-grid vertical-scroll'; // Nouvelle classe pour le scroll vertical
+  grid.id = 'productGrid'; // Même ID pour consister la compatibilité
+  
+  products.forEach(product => {
+    grid.appendChild(createProductCard(product));
+  });
+  
+  container.appendChild(grid);
+  
+  updateActiveCategoryButton(category);
 }
 function resetFilters() {
-  // Réinitialise tous les filtres et réaffiche tous les produits
   document.getElementById('searchInput').value = '';
   renderProducts();
   
-  // Réinitialise l'état actif des boutons
   document.querySelectorAll('.category-btn').forEach(btn => {
     btn.classList.remove('active');
   });
   document.querySelector('.category-btn[data-category="all"]').classList.add('active');
 }
-
 function updateModalState() {
   const hasCartOrDetails = config.uiState.cartOpen || config.uiState.detailsOpen;
   const hasCategoriesSlide = document.getElementById('categoriesSlide').classList.contains('open');
@@ -778,14 +797,23 @@ function initEventListeners() {
     if (e.key === 'Enter') filterProducts();
   });
  
+  
   // Catégories principales
   document.querySelectorAll('.category-btn:not(.more-btn)').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
-      filterByCategory(this.dataset.category);
+      
+      const category = this.dataset.category;
+      if (category === 'all') {
+        renderProducts();
+      } else {
+        filterByCategory(category);
+      }
     });
   });
+
+  
  
   // Bouton Plus
   document.getElementById('moreCategories').addEventListener('click', () => {
@@ -946,3 +974,63 @@ window.addEventListener('beforeinstallprompt', (e) => {
     console.log('User choice:', choice.outcome);
   });
 });
+// Fonction helper pour mélanger un tableau
+function shuffleArray(array) {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
+function showCategoryWithSubcategories(category) {
+  const container = document.getElementById('categorySections');
+  container.innerHTML = '';
+
+  const products = config.products.filter(p => p.category === category);
+  const subcategories = [...new Set(products.map(p => p.subcategory).filter(Boolean))];
+
+  if (subcategories.length === 0) {
+    // Pas de sous-catégories, afficher tous les produits en horizontal
+    const section = createCategorySection(category, products);
+    container.appendChild(section);
+    return;
+  }
+
+  // Afficher chaque sous-catégorie dans sa propre section
+  subcategories.forEach(subcategory => {
+    const subProducts = products.filter(p => p.subcategory === subcategory);
+    const section = createCategorySection(subcategory, subProducts);
+    container.appendChild(section);
+  });
+}
+function createCategorySection(title, products) {
+  const section = document.createElement('div');
+  section.className = 'category-section';
+  
+  const titleElement = document.createElement('h3');
+  titleElement.className = 'category-title';
+  titleElement.textContent = title;
+  section.appendChild(titleElement);
+  
+  const scrollContainer = document.createElement('div');
+  scrollContainer.className = 'product-scroll-container';
+  
+  products.forEach(product => {
+    scrollContainer.appendChild(createProductCard(product));
+  });
+  
+  section.appendChild(scrollContainer);
+  return section;
+}
+function updateActiveCategoryButton(category) {
+  document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.category === category) {
+      btn.classList.add('active');
+    } else if (category === 'all' && btn.dataset.category === 'all') {
+      btn.classList.add('active');
+    }
+  });
+}
