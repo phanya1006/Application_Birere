@@ -51,7 +51,7 @@ body.modal-open {
 .main-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0;
+  padding: 20px;
 }
 
 
@@ -1446,7 +1446,7 @@ h1 {
   display: flex;
   gap: 15px;
   overflow-x: auto;
-  padding-bottom: 0px;
+  padding-bottom: 15px;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none; /* Firefox */
@@ -1581,4 +1581,34 @@ h1 {
   font-size: 1.2rem;
   color: var(--text-secondary);
   grid-column: 1 / -1;
+}
+
+
+/* Conteneur de défilement infini */
+.product-scroll-container.infinite-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+}
+
+.product-scroll-container.infinite-scroll::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Animation de défilement infini */
+@keyframes infiniteScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.product-scroll-container.infinite-scroll.auto-scroll:hover {
+  animation-play-state: paused;
 }
