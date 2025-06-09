@@ -1271,7 +1271,7 @@ h1 {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
-    padding: 10px;
+    padding: 0px;
   }
 
   .product-card {
