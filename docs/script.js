@@ -29,6 +29,7 @@ async function initApp() {
   await loadProducts();
   initTheme();
   initEventListeners();
+  initInfiniteScroll(); 
   renderProducts();
   updateCartCount();
   
@@ -346,36 +347,24 @@ function displayCart() {
 function renderProducts() {
   const container = document.getElementById('categorySections');
   container.innerHTML = '';
-
-  // Grouper les produits par catégorie
+  
   const categories = [...new Set(config.products.map(p => p.category))];
+  const shuffledCategories = shuffleArray(categories);
 
-  categories.forEach(category => {
+  shuffledCategories.forEach(category => {
     const products = config.products.filter(p => p.category === category);
+    const shuffledProducts = shuffleArray(products);
     
-    // Créer la section de catégorie
-    const section = document.createElement('div');
-    section.className = 'category-section';
-    
-    // Ajouter le titre
-    const title = document.createElement('h3');
-    title.className = 'category-title';
-    title.textContent = category;
-    section.appendChild(title);
-    
-    // Créer le conteneur scrollable
-    const scrollContainer = document.createElement('div');
-    scrollContainer.className = 'product-scroll-container';
-    
-    // Ajouter les produits
-    products.forEach(product => {
-      const card = createProductCard(product);
-      scrollContainer.appendChild(card);
-    });
-    
-    section.appendChild(scrollContainer);
+    const section = createCategorySection(category, shuffledProducts);
     container.appendChild(section);
   });
+
+  // Optionnel : Activer le défilement automatique
+  setTimeout(() => {
+    document.querySelectorAll('.product-scroll-container.infinite-scroll').forEach(container => {
+      container.classList.add('auto-scroll');
+    });
+  }, 1000);
 }
 // Nouvelle fonction pour grouper les produits par catégorie
 function groupProductsByCategory() {
@@ -1015,9 +1004,12 @@ function createCategorySection(title, products) {
   section.appendChild(titleElement);
   
   const scrollContainer = document.createElement('div');
-  scrollContainer.className = 'product-scroll-container';
+  scrollContainer.className = 'product-scroll-container infinite-scroll';
   
-  products.forEach(product => {
+  // Dupliquer les produits pour créer l'effet infini
+  const duplicatedProducts = [...products, ...products, ...products];
+  
+  duplicatedProducts.forEach(product => {
     scrollContainer.appendChild(createProductCard(product));
   });
   
@@ -1032,5 +1024,16 @@ function updateActiveCategoryButton(category) {
     } else if (category === 'all' && btn.dataset.category === 'all') {
       btn.classList.add('active');
     }
+  });
+}
+function initInfiniteScroll() {
+  document.querySelectorAll('.product-scroll-container.infinite-scroll').forEach(container => {
+    container.addEventListener('scroll', function() {
+      if (this.scrollLeft > this.scrollWidth / 2) {
+        this.scrollLeft -= this.scrollWidth / 2;
+      } else if (this.scrollLeft === 0) {
+        this.scrollLeft = this.scrollWidth / 3;
+      }
+    });
   });
 }
