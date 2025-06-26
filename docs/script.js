@@ -845,14 +845,6 @@ function initPromoBanners() {
     currentBanner = (currentBanner + 1) % banners.length;
     banners[currentBanner].classList.add('active');
   }, 5000);
-  
-  // Gestion du clic
-  banners.forEach(banner => {
-    banner.addEventListener('click', () => {
-      const category = banner.dataset.category;
-      filterByCategory(category);
-    });
-  });
 }
 
 /* ========== FONCTIONS SOCIALES ========== */
