@@ -14,26 +14,15 @@ const config = {
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', initApp);
-document.querySelector('.category-btn[data-category="all"]').addEventListener('click', () => {
-  resetFilters();
-});
-document.querySelector('.back-to-categories').addEventListener('click', () => {
-  document.getElementById('subcategoriesSlide').classList.remove('active');
-  // Réinitialiser le filtre si nécessaire
-  if (!document.querySelector('.category-btn.active')) {
-    resetFilters();
-  }
-});
 
 async function initApp() {
   await loadProducts();
   initTheme();
   initEventListeners();
-  initInfiniteScroll(); 
   renderProducts();
   updateCartCount();
-  
-  // Initialisation PWA
+  initPromoBanners();
+  initSocialLinks();
   initPWA();
 }
 
@@ -46,7 +35,6 @@ async function loadProducts() {
     config.products = await response.json();
   } catch (error) {
     console.error("Erreur:", error);
-    // Fallback si le chargement échoue
     config.products = [
       {
         "id": "produit-par-defaut",
@@ -65,7 +53,6 @@ function extractCategories() {
   return Array.from(categories);
 }
 
-// Dans la fonction renderAllCategories
 function renderAllCategories() {
   const container = document.getElementById('allCategories');
   container.innerHTML = '';
@@ -100,7 +87,6 @@ function renderAllCategories() {
   });
 }
 
-// Modifiez la fonction showSubcategories comme suit :
 function showSubcategories(category, products) {
   const subcategories = [...new Set(products.map(p => p.subcategory).filter(Boolean))];
   const container = document.getElementById('subcategoriesGrid');
@@ -164,94 +150,107 @@ function filterProductsBySubcategory(category, subcategory) {
     return;
   }
 
-  // Créer une grille verticale pour les sous-catégories
-  const grid = document.createElement('div');
-  grid.className = 'product-grid vertical-scroll';
-  grid.id = 'productGrid';
-  
-  products.forEach(product => {
-    grid.appendChild(createProductCard(product));
-  });
-  
-  container.appendChild(grid);
+  const section = createCategorySection(subcategory || category, products);
+  container.appendChild(section);
 
   updateActiveCategoryButton(category);
 }
 
-// Nouvelle fonction pour filtrer par sous-catégorie
-function filterBySubcategory(category, subcategory) {
-  document.querySelectorAll('.product-card').forEach(card => {
-    const matches = card.dataset.category === category && 
-                   (card.dataset.subcategory === subcategory || 
-                    !subcategory);
-    card.style.display = matches ? 'block' : 'none';
+function createCategorySection(title, products) {
+  const section = document.createElement('div');
+  section.className = 'category-section';
+  
+  const titleElement = document.createElement('h3');
+  titleElement.className = 'category-title';
+  titleElement.textContent = title;
+  section.appendChild(titleElement);
+
+  // Sous-catégories
+  const subcategories = [...new Set(products.map(p => p.subcategory).filter(Boolean))];
+  if (subcategories.length > 1) {
+    const subcatContainer = document.createElement('div');
+    subcatContainer.className = 'subcategories-container';
+    
+    subcategories.forEach(sub => {
+      const btn = document.createElement('button');
+      btn.className = 'subcategory-btn';
+      btn.textContent = sub;
+      btn.dataset.category = title;
+      btn.dataset.subcategory = sub;
+      
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filterProductsBySubcategory(title, sub);
+      });
+      
+      subcatContainer.appendChild(btn);
+    });
+    
+    section.appendChild(subcatContainer);
+  }
+
+  // Produits
+  const scrollContainer = document.createElement('div');
+  scrollContainer.className = 'product-scroll-container';
+  
+  products.forEach(product => {
+    scrollContainer.appendChild(createProductCard(product));
   });
   
-  document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-  const mainBtn = document.querySelector(`.category-btn[data-category="${category}"]`);
-  if (mainBtn) mainBtn.classList.add('active');
+  section.appendChild(scrollContainer);
+  return section;
 }
 
-// Dans initEventListeners, ajouter :
-document.querySelector('.back-to-categories').addEventListener('click', () => {
-  document.getElementById('subcategoriesSlide').classList.remove('active');
-});
+function createProductCard(product) {
+  const card = document.createElement('div');
+  card.className = 'product-card';
+  card.dataset.name = product.name.toLowerCase();
+  card.dataset.category = product.category;
+  card.dataset.id = product.id;
+  
+  card.innerHTML = `
+    <img src="${product.image}" alt="${product.name}" loading="lazy">
+    <div class="product-info">
+      <h3>${product.name}</h3>
+      <div class="price">${product.price} USD</div>
+      ${product.rating ? `
+      <div class="rating">
+        ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
+        <span>(${product.reviews || 0})</span>
+      </div>` : ''}
+    </div>
+    <div class="product-actions">
+      <button class="order-btn">Commander</button>
+      <button class="add-cart-btn">Ajouter</button>
+    </div>
+  `;
+  
+  card.querySelector('img').addEventListener('click', () => showProductDetails(product.id));
+  card.querySelector('.order-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
+  });
+  card.querySelector('.add-cart-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    addToCart(product);
+  });
+
+  return card;
+}
 
 function renderProducts() {
-  const grid = document.getElementById('productGrid');
-  grid.innerHTML = '';
-  // Mélanger aléatoirement l'ordre des catégories
+  const container = document.getElementById('categorySections');
+  container.innerHTML = '';
+  
   const categories = [...new Set(config.products.map(p => p.category))];
   const shuffledCategories = shuffleArray(categories);
 
   shuffledCategories.forEach(category => {
     const products = config.products.filter(p => p.category === category);
-    // Mélanger les produits dans chaque catégorie
     const shuffledProducts = shuffleArray(products);
     
     const section = createCategorySection(category, shuffledProducts);
     container.appendChild(section);
-  });
-
-  // Crée une copie du tableau et le mélange aléatoirement
-  const shuffledProducts = [...config.products].sort(() => Math.random() - 0.5);
-
-  shuffledProducts.forEach((product, index) => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.dataset.name = product.name.toLowerCase();
-    card.dataset.category = product.category;
-    card.dataset.id = product.id;
-    card.style.animationDelay = `${index * 0.1}s`;
-   
-    card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" loading="lazy">
-      <div class="product-info">
-        <h3>${product.name}</h3>
-        <div class="price">${product.price} USD</div>
-        ${product.rating ? `
-        <div class="rating">
-          ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
-          <span>(${product.reviews || 0})</span>
-        </div>` : ''}
-      </div>
-      <div class="product-actions">
-        <button class="order-btn">Commander</button>
-        <button class="add-cart-btn">Ajouter</button>
-      </div>
-    `;
-   
-    card.querySelector('img').addEventListener('click', () => showProductDetails(product.id));
-    card.querySelector('.order-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
-    });
-    card.querySelector('.add-cart-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      addToCart(product);
-    });
-
-    grid.appendChild(card);
   });
 }
 
@@ -265,19 +264,24 @@ function toggleCart() {
 
 function addToCart(product, options = {}) {
   const quantity = options.quantity || 1;
+  
+  const selectedImage = config.uiState.selectedProduct?.id === product.id 
+    ? config.uiState.selectedImage 
+    : product.image;
+
   const cartItem = {
     ...product,
     options,
     quantity,
-    cartId: `${product.id}-${Date.now()}`,
+    cartId: `${product.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     addedAt: new Date().toISOString(),
-    selectedImage: config.uiState.selectedImage || product.image // Sauvegarde l'image sélectionnée
+    selectedImage: selectedImage
   };
 
   const existingIndex = config.cart.findIndex(item => 
     item.id === product.id && 
     JSON.stringify(item.options) === JSON.stringify(options) &&
-    item.selectedImage === cartItem.selectedImage // Ajoute cette comparaison
+    item.selectedImage === selectedImage
   );
 
   if (existingIndex >= 0) {
@@ -323,11 +327,8 @@ function displayCart() {
         .join('')}</div>`;
     }
     
-    // Utiliser item.selectedImage si elle existe, sinon l'image par défaut
-    const displayImage = item.selectedImage || item.image;
-    
     li.innerHTML = `
-      <img src="${displayImage}" alt="${item.name}" loading="lazy">
+      <img src="${item.selectedImage || item.image}" alt="${item.name}" loading="lazy">
       <div class="cart-item-info">
         <h4>${item.name} <span class="item-qty">×${item.quantity}</span></h4>
         <div class="price">${(parseFloat(item.price) * item.quantity)} USD</div>
@@ -343,80 +344,7 @@ function displayCart() {
   const total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
   document.getElementById('cartTotal').textContent = `${total.toFixed(2)} USD`;
 }
-// Nouvelle fonction pour afficher les produits par catégorie
-function renderProducts() {
-  const container = document.getElementById('categorySections');
-  container.innerHTML = '';
-  
-  const categories = [...new Set(config.products.map(p => p.category))];
-  const shuffledCategories = shuffleArray(categories);
 
-  shuffledCategories.forEach(category => {
-    const products = config.products.filter(p => p.category === category);
-    const shuffledProducts = shuffleArray(products);
-    
-    const section = createCategorySection(category, shuffledProducts);
-    container.appendChild(section);
-  });
-
-  // Optionnel : Activer le défilement automatique
-  setTimeout(() => {
-    document.querySelectorAll('.product-scroll-container.infinite-scroll').forEach(container => {
-      container.classList.add('auto-scroll');
-    });
-  }, 1000);
-}
-// Nouvelle fonction pour grouper les produits par catégorie
-function groupProductsByCategory() {
-  const categories = {};
-  
-  config.products.forEach(product => {
-    if (!categories[product.category]) {
-      categories[product.category] = [];
-    }
-    categories[product.category].push(product);
-  });
-  
-  return categories;
-}
-
-// Fonction helper pour créer une carte produit
-function createProductCard(product) {
-  const card = document.createElement('div');
-  card.className = 'product-card';
-  card.dataset.name = product.name.toLowerCase();
-  card.dataset.category = product.category;
-  card.dataset.id = product.id;
-  
-  card.innerHTML = `
-    <img src="${product.image}" alt="${product.name}" loading="lazy">
-    <div class="product-info">
-      <h3>${product.name}</h3>
-      <div class="price">${product.price} USD</div>
-      ${product.rating ? `
-      <div class="rating">
-        ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
-        <span>(${product.reviews || 0})</span>
-      </div>` : ''}
-    </div>
-    <div class="product-actions">
-      <button class="order-btn">Commander</button>
-      <button class="add-cart-btn">Ajouter</button>
-    </div>
-  `;
-  
-  card.querySelector('img').addEventListener('click', () => showProductDetails(product.id));
-  card.querySelector('.order-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
-  });
-  card.querySelector('.add-cart-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    addToCart(product);
-  });
-
-  return card;
-}
 function removeFromCart(cartId) {
   config.cart = config.cart.filter(item => item.cartId !== cartId);
   updateCartUI();
@@ -450,7 +378,6 @@ function orderCart() {
         .map(([key, val]) => `${key}: ${val}`)
         .join(', ')}]`;
     }
-    // Ajouter le lien de l'image sélectionnée
     if (item.selectedImage) {
       message += `\nImage: ${item.selectedImage}`;
     }
@@ -463,50 +390,17 @@ function orderCart() {
   openWhatsApp(message);
 }
 
-function addToCart(product, options = {}) {
-  const quantity = options.quantity || 1;
-  
-  // Garantie que l'image vient bien du produit courant
-  const selectedImage = config.uiState.selectedProduct?.id === product.id 
-    ? config.uiState.selectedImage 
-    : product.image;
-
-  const cartItem = {
-    ...product,
-    options,
-    quantity,
-    cartId: `${product.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    addedAt: new Date().toISOString(),
-    selectedImage: selectedImage
-  };
-
-  // Vérifie si l'article existe déjà (même ID, mêmes options et même image)
-  const existingIndex = config.cart.findIndex(item => 
-    item.id === product.id && 
-    JSON.stringify(item.options) === JSON.stringify(options) &&
-    item.selectedImage === selectedImage
-  );
-
-  if (existingIndex >= 0) {
-    config.cart[existingIndex].quantity += quantity;
-  } else {
-    config.cart.push(cartItem);
-  }
-  
-  updateCartUI();
-  showNotification(`${product.name} ajouté au panier`);
-}
 /* ========== FICHE PRODUIT DÉTAILLÉE ========== */
+
 function showProductDetails(productId) {
   const product = config.products.find(p => p.id === productId);
   if (!product) return;
 
-  // Réinitialisation complète de l'état
   config.uiState = {
     detailsOpen: true,
     selectedProduct: product,
     selectedOptions: {},
-    selectedImage: product.image // Toujours partir de l'image par défaut
+    selectedImage: product.image
   };
   
   updateModalState();
@@ -579,7 +473,6 @@ function showProductDetails(productId) {
     </div>
   `;
 
-  // Gestion des événements
   const qtyInput = document.querySelector('.qty-input');
   document.querySelector('.qty-btn.minus').addEventListener('click', () => {
     if (parseInt(qtyInput.value) > 1) qtyInput.value = parseInt(qtyInput.value) - 1;
@@ -598,7 +491,6 @@ function showProductDetails(productId) {
     closeProductDetails();
   });
 
-  // Gestion des options
   if (product.options) {
     document.querySelectorAll('.option-btn').forEach(btn => {
       btn.addEventListener('click', function() {
@@ -617,7 +509,6 @@ function showProductDetails(productId) {
     });
   }
 
-  // Gestion des thumbnails
   if (product.images && product.images.length > 0) {
     document.querySelectorAll('.thumbnail').forEach((thumb) => {
       thumb.addEventListener('click', function() {
@@ -638,7 +529,7 @@ function closeProductDetails() {
   config.uiState.detailsOpen = false;
   config.uiState.selectedProduct = null;
   config.uiState.selectedOptions = {};
-  config.uiState.selectedImage= null;
+  config.uiState.selectedImage = null;
   updateModalState();
   document.getElementById('productDetailsSlide').classList.remove('open');
 }
@@ -662,7 +553,7 @@ function filterProducts() {
   );
 
   if (input.trim() === '') {
-    renderProducts(); // Affiche tout si la recherche est vide
+    renderProducts();
     return;
   }
 
@@ -671,7 +562,6 @@ function filterProducts() {
     return;
   }
 
-  // Créer une grille verticale pour les résultats de recherche
   const grid = document.createElement('div');
   grid.className = 'product-grid vertical-scroll';
   
@@ -682,36 +572,33 @@ function filterProducts() {
   container.appendChild(grid);
 }
 
-// Modifier filterByCategory pour utiliser la même structure
 function filterByCategory(category) {
   const container = document.getElementById('categorySections');
   container.innerHTML = '';
   
   if (category === 'all') {
-    renderProducts(); // Garde le scroll horizontal pour "Tous"
+    renderProducts();
     return;
   }
 
   const products = config.products.filter(p => p.category === category);
-  
-  if (products.length === 0) {
-    container.innerHTML = '<p class="no-products">Aucun produit dans cette catégorie</p>';
+  const subcategories = [...new Set(products.map(p => p.subcategory).filter(Boolean))];
+
+  if (subcategories.length === 0) {
+    const section = createCategorySection(category, products);
+    container.appendChild(section);
     return;
   }
 
-  // Pour les autres catégories, on utilise une grille verticale normale
-  const grid = document.createElement('div');
-  grid.className = 'product-grid vertical-scroll'; // Nouvelle classe pour le scroll vertical
-  grid.id = 'productGrid'; // Même ID pour consister la compatibilité
-  
-  products.forEach(product => {
-    grid.appendChild(createProductCard(product));
+  subcategories.forEach(subcategory => {
+    const subProducts = products.filter(p => p.subcategory === subcategory);
+    const section = createCategorySection(subcategory, subProducts);
+    container.appendChild(section);
   });
-  
-  container.appendChild(grid);
-  
+
   updateActiveCategoryButton(category);
 }
+
 function resetFilters() {
   document.getElementById('searchInput').value = '';
   renderProducts();
@@ -721,6 +608,7 @@ function resetFilters() {
   });
   document.querySelector('.category-btn[data-category="all"]').classList.add('active');
 }
+
 function updateModalState() {
   const hasCartOrDetails = config.uiState.cartOpen || config.uiState.detailsOpen;
   const hasCategoriesSlide = document.getElementById('categoriesSlide').classList.contains('open');
@@ -786,7 +674,6 @@ function initEventListeners() {
     if (e.key === 'Enter') filterProducts();
   });
  
-  
   // Catégories principales
   document.querySelectorAll('.category-btn:not(.more-btn)').forEach(btn => {
     btn.addEventListener('click', function() {
@@ -801,8 +688,6 @@ function initEventListeners() {
       }
     });
   });
-
-  
  
   // Bouton Plus
   document.getElementById('moreCategories').addEventListener('click', () => {
@@ -816,11 +701,11 @@ function initEventListeners() {
     document.getElementById('categoriesSlide').classList.remove('open');
     updateModalState();
   });
-  // fermeture produits
-document.querySelector('.close-details').addEventListener('click', (e) => {
-  e.stopPropagation();
-  closeProductDetails();
-});
+
+  document.querySelector('.close-details').addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeProductDetails();
+  });
  
   // Thème
   document.querySelectorAll('.theme-btn').forEach(btn => {
@@ -831,69 +716,30 @@ document.querySelector('.close-details').addEventListener('click', (e) => {
       updateThemeButtons();
     });
   });
+
+  // Bouton "Voir tous les produits"
+  document.getElementById('seeAllBtn').addEventListener('click', function() {
+    document.querySelector('.main-container').style.display = 'none';
+    document.getElementById('allProductsPage').style.display = 'block';
+    initMasonryGrid();
+  });
+
+  // Bouton Retour à l'accueil
+  document.querySelector('.back-to-home-btn').addEventListener('click', function() {
+    document.getElementById('allProductsPage').style.display = 'none';
+    document.querySelector('.main-container').style.display = 'block';
+    window.scrollTo(0, 0);
+  });
 }
 
 /* ========== FONCTIONS PWA ========== */
 
 function initPWA() {
-  // Installation
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    showInstallButton();
-  });
-
-  // Vérification mise à jour
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
-    });
-  }
-}
-
-function showInstallButton() {
-  if (document.getElementById('installBtn')) return;
-
-  const installBtn = document.createElement('button');
-  installBtn.id = 'installBtn';
-  installBtn.className = 'install-btn';
-  installBtn.innerHTML = '📲 Installer l\'app';
-  installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) {
-      // Si deferredPrompt n'est pas disponible, guidez l'utilisateur
-      alert("Pour installer l'application, utilisez le menu de votre navigateur (icône de partage ou menu ⋮)");
-      return;
-    }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('App installée');
-      installBtn.remove();
-    }
-    deferredPrompt = null;
-  });
-  document.body.appendChild(installBtn);
-  
-  // Affichez toujours le bouton après 10s (solution alternative)
-  setTimeout(() => {
-    if (!document.getElementById('installBtn')) {
-      showInstallButton();
-    }
-  }, 10000);
-}
-/* ==================== SERVICE WORKER & PWA ==================== */
-
-// Enregistrement et gestion du Service Worker
-// Remplacez les deux définitions de initPWA() par cette version unique
-function initPWA() {
-  // 1. Enregistrement du Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
       .then(registration => {
         console.log('Service Worker enregistré avec succès');
 
-        // 2. Gestion des mises à jour
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
           newWorker.addEventListener('statechange', () => {
@@ -907,13 +753,11 @@ function initPWA() {
       })
       .catch(err => console.error("Échec de l'enregistrement :", err));
 
-    // 3. Rafraîchissement après mise à jour
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       window.location.reload();
     });
   }
 
-  // 4. Gestion de l'installation PWA
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -922,7 +766,6 @@ function initPWA() {
   });
 }
 
-// Affiche le bouton d'installation
 function showInstallButton() {
   if (document.getElementById('installBtn')) return;
 
@@ -943,27 +786,94 @@ function showInstallButton() {
   document.body.appendChild(installBtn);
 }
 
-// Appelez initPWA() dans votre fonction initApp()
-async function initApp() {
-  await loadProducts();
-  initTheme();
-  initEventListeners();
-  renderProducts();
-  updateCartCount();
-  initPWA(); // <-- Ajoutez cette ligne !
-}
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  console.log('beforeinstallprompt event fired'); // Debug
-  showInstallButton();
+/* ========== FONCTIONS MASONRY ========== */
+
+function initMasonryGrid() {
+  const grid = document.getElementById('masonryGrid');
+  if (!grid) return;
+
+  grid.innerHTML = '';
   
-  // Debug: affichez les critères d'installation
-  e.userChoice.then(choice => {
-    console.log('User choice:', choice.outcome);
+  // Créer un tableau de colonnes
+  const columns = 3;
+  const columnElements = [];
+  
+  for (let i = 0; i < columns; i++) {
+    const column = document.createElement('div');
+    column.className = 'masonry-column';
+    grid.appendChild(column);
+    columnElements.push(column);
+  }
+  
+  // Répartir les produits dans les colonnes
+  config.products.forEach((product, index) => {
+    const columnIndex = index % columns;
+    const column = columnElements[columnIndex];
+    
+    const item = document.createElement('div');
+    item.className = 'masonry-item';
+    item.dataset.id = product.id;
+    
+    item.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" class="masonry-img">
+      <div class="masonry-overlay">
+        <h3>${product.name}</h3>
+        <p>${product.price} USD</p>
+      </div>
+    `;
+    
+    item.addEventListener('click', () => {
+      showProductDetails(product.id);
+    });
+    
+    column.appendChild(item);
   });
-});
-// Fonction helper pour mélanger un tableau
+}
+
+/* ========== FONCTIONS PROMO BANNERS ========== */
+
+function initPromoBanners() {
+  const banners = document.querySelectorAll('.promo-banner');
+  let currentBanner = 0;
+  
+  // Afficher la première bannière
+  banners[currentBanner].classList.add('active');
+  
+  // Rotation automatique
+  setInterval(() => {
+    banners[currentBanner].classList.remove('active');
+    currentBanner = (currentBanner + 1) % banners.length;
+    banners[currentBanner].classList.add('active');
+  }, 5000);
+  
+  // Gestion du clic
+  banners.forEach(banner => {
+    banner.addEventListener('click', () => {
+      const category = banner.dataset.category;
+      filterByCategory(category);
+    });
+  });
+}
+
+/* ========== FONCTIONS SOCIALES ========== */
+
+function initSocialLinks() {
+  const socialConfig = {
+    facebook: 'https://facebook.com/birereexpress',
+    whatsapp: `https://wa.me/${config.phoneNumber}`,
+    instagram: 'https://instagram.com/birereexpress',
+    tiktok: 'https://tiktok.com/@birereexpress',
+    snapchat: 'https://snapchat.com/add/birereexpress'
+  };
+
+  Object.entries(socialConfig).forEach(([platform, url]) => {
+    const element = document.getElementById(`${platform}Link`);
+    if (element) element.href = url;
+  });
+}
+
+/* ========== FONCTIONS UTILITAIRES ========== */
+
 function shuffleArray(array) {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
@@ -973,49 +883,6 @@ function shuffleArray(array) {
   return newArray;
 }
 
-function showCategoryWithSubcategories(category) {
-  const container = document.getElementById('categorySections');
-  container.innerHTML = '';
-
-  const products = config.products.filter(p => p.category === category);
-  const subcategories = [...new Set(products.map(p => p.subcategory).filter(Boolean))];
-
-  if (subcategories.length === 0) {
-    // Pas de sous-catégories, afficher tous les produits en horizontal
-    const section = createCategorySection(category, products);
-    container.appendChild(section);
-    return;
-  }
-
-  // Afficher chaque sous-catégorie dans sa propre section
-  subcategories.forEach(subcategory => {
-    const subProducts = products.filter(p => p.subcategory === subcategory);
-    const section = createCategorySection(subcategory, subProducts);
-    container.appendChild(section);
-  });
-}
-function createCategorySection(title, products) {
-  const section = document.createElement('div');
-  section.className = 'category-section';
-  
-  const titleElement = document.createElement('h3');
-  titleElement.className = 'category-title';
-  titleElement.textContent = title;
-  section.appendChild(titleElement);
-  
-  const scrollContainer = document.createElement('div');
-  scrollContainer.className = 'product-scroll-container infinite-scroll';
-  
-  // Dupliquer les produits pour créer l'effet infini
-  const duplicatedProducts = [...products, ...products, ...products];
-  
-  duplicatedProducts.forEach(product => {
-    scrollContainer.appendChild(createProductCard(product));
-  });
-  
-  section.appendChild(scrollContainer);
-  return section;
-}
 function updateActiveCategoryButton(category) {
   document.querySelectorAll('.category-btn').forEach(btn => {
     btn.classList.remove('active');
@@ -1024,16 +891,5 @@ function updateActiveCategoryButton(category) {
     } else if (category === 'all' && btn.dataset.category === 'all') {
       btn.classList.add('active');
     }
-  });
-}
-function initInfiniteScroll() {
-  document.querySelectorAll('.product-scroll-container.infinite-scroll').forEach(container => {
-    container.addEventListener('scroll', function() {
-      if (this.scrollLeft > this.scrollWidth / 2) {
-        this.scrollLeft -= this.scrollWidth / 2;
-      } else if (this.scrollLeft === 0) {
-        this.scrollLeft = this.scrollWidth / 3;
-      }
-    });
   });
 }
