@@ -450,6 +450,7 @@ h1 {
 
 .cart-sidebar.open {
   right: 0;
+  height: 100%;
 }
 
 .cart-header {
