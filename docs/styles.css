@@ -3206,6 +3206,8 @@ h1 {
 
 .menu-sidebar.open {
   right: 0;
+  width: auto;
+  height: auto;
 }
 
 .menu-header {
