@@ -701,6 +701,15 @@ function initEventListeners() {
     document.getElementById('categoriesSlide').classList.remove('open');
     updateModalState();
   });
+  
+  // Bouton Retour dans les sous-catégories
+  document.querySelector('.back-to-categories').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('subcategoriesSlide').classList.remove('active');
+  });
+
+  // ... autres écouteurs d'événements ...
+
 
   document.querySelector('.close-details').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -845,6 +854,7 @@ function initPromoBanners() {
     currentBanner = (currentBanner + 1) % banners.length;
     banners[currentBanner].classList.add('active');
   }, 5000);
+ 
 }
 
 /* ========== FONCTIONS SOCIALES ========== */
@@ -885,3 +895,4 @@ function updateActiveCategoryButton(category) {
     }
   });
 }
+
