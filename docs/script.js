@@ -8,7 +8,63 @@ const config = {
     cartOpen: false,
     detailsOpen: false,
     selectedProduct: null,
-    selectedOptions: {}
+    selectedOptions: {},
+    menuOpen: false
+  },
+  currency: localStorage.getItem('currency') || 'USD',
+  language: localStorage.getItem('language') || 'fr',
+  exchangeRate: 3000 // 1 USD = 3000 CDF
+};
+
+// Traductions
+const translations = {
+  fr: {
+    cartTitle: "Votre Panier",
+    emptyCart: "Votre panier est vide",
+    total: "Total:",
+    clearCart: "Vider",
+    order: "Commander",
+    addToCart: "Ajouter au panier",
+    seeAll: "Voir tous les produits",
+    back: "Retour",
+    categories: "Catégories",
+    options: "Options",
+    guide: "Guide d'utilisation",
+    currency: "Devise",
+    language: "Langue",
+    theme: "Thème",
+    support: "Support client",
+    about: "À propos",
+    darkTheme: "Sombre",
+    lightTheme: "Clair",
+    french: "Français",
+    english: "Anglais",
+    usd: "USD",
+    cdf: "CDF"
+  },
+  en: {
+    cartTitle: "Your Cart",
+    emptyCart: "Your cart is empty",
+    total: "Total:",
+    clearCart: "Clear",
+    order: "Order",
+    addToCart: "Add to cart",
+    seeAll: "See all products",
+    back: "Back",
+    categories: "Categories",
+    options: "Options",
+    guide: "User Guide",
+    currency: "Currency",
+    language: "Language",
+    theme: "Theme",
+    support: "Customer Support",
+    about: "About",
+    darkTheme: "Dark",
+    lightTheme: "Light",
+    french: "French",
+    english: "English",
+    usd: "USD",
+    cdf: "CDF"
   }
 };
 
@@ -24,6 +80,8 @@ async function initApp() {
   initPromoBanners();
   initSocialLinks();
   initPWA();
+  updateLanguageUI();
+  updateCurrencyUI();
 }
 
 /* ========== FONCTIONS PRODUITS ========== */
@@ -208,11 +266,13 @@ function createProductCard(product) {
   card.dataset.category = product.category;
   card.dataset.id = product.id;
   
+  const price = convertCurrency(parseFloat(product.price));
+  
   card.innerHTML = `
     <img src="${product.image}" alt="${product.name}" loading="lazy">
     <div class="product-info">
       <h3>${product.name}</h3>
-      <div class="price">${product.price} USD</div>
+      <div class="price">${price}</div>
       ${product.rating ? `
       <div class="rating">
         ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
@@ -220,15 +280,15 @@ function createProductCard(product) {
       </div>` : ''}
     </div>
     <div class="product-actions">
-      <button class="order-btn">Commander</button>
-      <button class="add-cart-btn">Ajouter</button>
+      <button class="order-btn">${translate('order')}</button>
+      <button class="add-cart-btn">${translate('addToCart')}</button>
     </div>
   `;
   
   card.querySelector('img').addEventListener('click', () => showProductDetails(product.id));
   card.querySelector('.order-btn').addEventListener('click', (e) => {
     e.stopPropagation();
-    openWhatsApp(`Bonjour, je veux commander : ${product.name} (${product.price} USD)`);
+    openWhatsApp(`${translate('order')}: ${product.name} (${price})`);
   });
   card.querySelector('.add-cart-btn').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -291,7 +351,7 @@ function addToCart(product, options = {}) {
   }
   
   updateCartUI();
-  showNotification(`${product.name} ajouté au panier`);
+  showNotification(`${product.name} ${translate('addToCart')}`);
 }
 
 function updateCartUI() {
@@ -310,7 +370,7 @@ function displayCart() {
   if (config.cart.length === 0) {
     cartItems.innerHTML = `
       <li class="empty-cart">
-        <p>Votre panier est vide</p>
+        <p>${translate('emptyCart')}</p>
       </li>
     `;
     return;
@@ -327,11 +387,13 @@ function displayCart() {
         .join('')}</div>`;
     }
     
+    const price = convertCurrency(parseFloat(item.price) * item.quantity);
+    
     li.innerHTML = `
       <img src="${item.selectedImage || item.image}" alt="${item.name}" loading="lazy">
       <div class="cart-item-info">
         <h4>${item.name} <span class="item-qty">×${item.quantity}</span></h4>
-        <div class="price">${(parseFloat(item.price) * item.quantity)} USD</div>
+        <div class="price">${price}</div>
         ${optionsText}
       </div>
       <button class="remove-item-btn">&times;</button>
@@ -342,7 +404,7 @@ function displayCart() {
   });
 
   const total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
-  document.getElementById('cartTotal').textContent = `${total.toFixed(2)} USD`;
+  document.getElementById('cartTotal').textContent = `${translate('total')} ${convertCurrency(total)}`;
 }
 
 function removeFromCart(cartId) {
@@ -365,13 +427,13 @@ function updateCartCount() {
 
 function orderCart() {
   if (config.cart.length === 0) {
-    alert("Votre panier est vide.");
+    alert(translate('emptyCart'));
     return;
   }
 
-  let message = "Bonjour, je souhaite commander :\n";
+  let message = `${translate('order')}:\n`;
   config.cart.forEach(item => {
-    message += `- ${item.name} (${item.price} USD)`;
+    message += `- ${item.name} (${convertCurrency(parseFloat(item.price))}`;
     if (item.quantity > 1) message += ` × ${item.quantity}`;
     if (item.options) {
       message += ` [${Object.entries(item.options)
@@ -385,7 +447,7 @@ function orderCart() {
   });
 
   const total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
-  message += `\nTotal: ${total.toFixed(2)} USD`;
+  message += `\n${translate('total')}: ${convertCurrency(total)}`;
 
   openWhatsApp(message);
 }
@@ -405,6 +467,8 @@ function showProductDetails(productId) {
   
   updateModalState();
 
+  const price = convertCurrency(parseFloat(product.price));
+  
   document.getElementById('detailsContent').innerHTML = `
     <div class="product-gallery">
       <div class="main-image">
@@ -423,7 +487,7 @@ function showProductDetails(productId) {
     <div class="product-details">
       <div class="product-header">
         <h2>${product.name}</h2>
-        <div class="price">${product.price} USD</div>
+        <div class="price">${price}</div>
         ${product.rating ? `
         <div class="rating">
           ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5-Math.round(product.rating))}
@@ -468,7 +532,7 @@ function showProductDetails(productId) {
           <input type="number" value="1" min="1" class="qty-input">
           <button class="qty-btn plus">+</button>
         </div>
-        <button class="add-cart-btn full-width">Ajouter au panier</button>
+        <button class="add-cart-btn full-width">${translate('addToCart')}</button>
       </div>
     </div>
   `;
@@ -612,10 +676,11 @@ function resetFilters() {
 function updateModalState() {
   const hasCartOrDetails = config.uiState.cartOpen || config.uiState.detailsOpen;
   const hasCategoriesSlide = document.getElementById('categoriesSlide').classList.contains('open');
+  const hasMenuOpen = config.uiState.menuOpen;
   
-  document.body.classList.toggle('modal-open', hasCartOrDetails || hasCategoriesSlide);
-  document.getElementById('overlay').style.display = (hasCartOrDetails || hasCategoriesSlide) ? 'block' : 'none';
-  document.body.style.overflow = (hasCartOrDetails || hasCategoriesSlide) ? 'hidden' : 'auto';
+  document.body.classList.toggle('modal-open', hasCartOrDetails || hasCategoriesSlide || hasMenuOpen);
+  document.getElementById('overlay').style.display = (hasCartOrDetails || hasCategoriesSlide || hasMenuOpen) ? 'block' : 'none';
+  document.body.style.overflow = (hasCartOrDetails || hasCategoriesSlide || hasMenuOpen) ? 'hidden' : 'auto';
 }
 
 function showNotification(message) {
@@ -633,11 +698,97 @@ function showNotification(message) {
 function initTheme() {
   document.body.setAttribute('data-theme', config.theme);
   updateThemeButtons();
+  updateThemeText();
 }
 
 function updateThemeButtons() {
   document.querySelectorAll('.theme-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === config.theme);
+  });
+}
+
+function updateThemeText() {
+  const themeText = config.theme === 'dark' ? translate('darkTheme') : translate('lightTheme');
+  document.getElementById('currentTheme').textContent = themeText;
+}
+
+function toggleTheme() {
+  config.theme = config.theme === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', config.theme);
+  localStorage.setItem('theme', config.theme);
+  updateThemeButtons();
+  updateThemeText();
+}
+
+/* ========== GESTION DE LA LANGUE ========== */
+
+function updateLanguageUI() {
+  const languageText = config.language === 'fr' ? translate('french') : translate('english');
+  document.getElementById('currentLanguage').textContent = languageText;
+  
+  // Mettre à jour tous les textes traduits dans l'interface
+  document.querySelectorAll('[data-translate]').forEach(el => {
+    const key = el.dataset.translate;
+    el.textContent = translate(key);
+  });
+}
+
+function toggleLanguage() {
+  config.language = config.language === 'fr' ? 'en' : 'fr';
+  localStorage.setItem('language', config.language);
+  updateLanguageUI();
+  updateCurrencyUI(); // Les prix peuvent changer de format
+  renderProducts(); // Mettre à jour les prix dans les produits
+  displayCart(); // Mettre à jour les prix dans le panier
+}
+
+function translate(key) {
+  return translations[config.language][key] || key;
+}
+
+/* ========== GESTION DE LA DEVISE ========== */
+
+function updateCurrencyUI() {
+  document.getElementById('currentCurrency').textContent = config.currency;
+  renderProducts(); // Mettre à jour les prix affichés
+  displayCart(); // Mettre à jour le panier
+}
+
+function toggleCurrency() {
+  config.currency = config.currency === 'USD' ? 'CDF' : 'USD';
+  localStorage.setItem('currency', config.currency);
+  updateCurrencyUI();
+}
+
+function convertCurrency(amount) {
+  if (config.currency === 'CDF') {
+    return `${Math.round(amount * config.exchangeRate).toLocaleString()} CDF`;
+  }
+  return `${amount.toFixed(2)} USD`;
+}
+
+/* ========== GESTION DU MENU OPTIONS ========== */
+
+function toggleMenu() {
+  config.uiState.menuOpen = !config.uiState.menuOpen;
+  document.getElementById('menuSidebar').classList.toggle('open', config.uiState.menuOpen);
+  updateModalState();
+}
+
+function showGuideModal() {
+  const guideModal = document.getElementById('guideModal');
+  guideModal.classList.add('open');
+  
+  // Ajouter un écouteur pour fermer le modal
+  document.querySelector('.close-guide').addEventListener('click', () => {
+    guideModal.classList.remove('open');
+  });
+  
+  // Fermer quand on clique en dehors
+  guideModal.addEventListener('click', (e) => {
+    if (e.target === guideModal) {
+      guideModal.classList.remove('open');
+    }
   });
 }
 
@@ -648,6 +799,7 @@ function initEventListeners() {
   document.getElementById('overlay').addEventListener('click', () => {
     if (config.uiState.cartOpen) toggleCart();
     if (config.uiState.detailsOpen) closeProductDetails();
+    if (config.uiState.menuOpen) toggleMenu();
     document.getElementById('categoriesSlide').classList.remove('open');
     updateModalState();
   });
@@ -657,6 +809,7 @@ function initEventListeners() {
     if (e.key === 'Escape') {
       if (config.uiState.cartOpen) toggleCart();
       if (config.uiState.detailsOpen) closeProductDetails();
+      if (config.uiState.menuOpen) toggleMenu();
       document.getElementById('categoriesSlide').classList.remove('open');
       updateModalState();
     }
@@ -708,9 +861,6 @@ function initEventListeners() {
     document.getElementById('subcategoriesSlide').classList.remove('active');
   });
 
-  // ... autres écouteurs d'événements ...
-
-
   document.querySelector('.close-details').addEventListener('click', (e) => {
     e.stopPropagation();
     closeProductDetails();
@@ -723,6 +873,7 @@ function initEventListeners() {
       document.body.setAttribute('data-theme', config.theme);
       localStorage.setItem('theme', config.theme);
       updateThemeButtons();
+      updateThemeText();
     });
   });
 
@@ -738,6 +889,26 @@ function initEventListeners() {
     document.getElementById('allProductsPage').style.display = 'none';
     document.querySelector('.main-container').style.display = 'block';
     window.scrollTo(0, 0);
+  });
+  
+  // Menu Options
+  document.getElementById('menuToggle').addEventListener('click', toggleMenu);
+  document.querySelector('.close-menu').addEventListener('click', toggleMenu);
+  
+  // Options du menu
+  document.getElementById('guideBtn').addEventListener('click', showGuideModal);
+  document.getElementById('currencyBtn').addEventListener('click', toggleCurrency);
+  document.getElementById('languageBtn').addEventListener('click', toggleLanguage);
+  document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+  
+  // Support client
+  document.getElementById('contactBtn').addEventListener('click', () => {
+    openWhatsApp("Bonjour, j'ai besoin d'aide concernant Biréré Express");
+  });
+  
+  // À propos
+  document.getElementById('aboutBtn').addEventListener('click', () => {
+    alert("Biréré Express - Votre boutique en ligne préférée\nVersion 1.0");
   });
 }
 
@@ -823,11 +994,13 @@ function initMasonryGrid() {
     item.className = 'masonry-item';
     item.dataset.id = product.id;
     
+    const price = convertCurrency(parseFloat(product.price));
+    
     item.innerHTML = `
       <img src="${product.image}" alt="${product.name}" class="masonry-img">
       <div class="masonry-overlay">
         <h3>${product.name}</h3>
-        <p>${product.price} USD</p>
+        <p>${price}</p>
       </div>
     `;
     
@@ -895,4 +1068,3 @@ function updateActiveCategoryButton(category) {
     }
   });
 }
-
