@@ -934,6 +934,7 @@ h1 {
   overflow-y: auto;
   transform: translateX(100%);
   transition: transform 0.3s ease-out;
+  height: max-content;
 }
 
 .subcategories-slide.active {
