@@ -1320,6 +1320,7 @@ footer {
   .cart-sidebar {
     width: 100%;
     padding: 1rem;
+    height: 100%;
   }
 
   .details-content {
