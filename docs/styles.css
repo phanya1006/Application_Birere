@@ -3206,7 +3206,7 @@ h1 {
 
 .menu-sidebar.open {
   right: 0;
-  width: auto;
+  width: 50%;
   height: auto;
 }
 
