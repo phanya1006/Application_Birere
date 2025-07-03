@@ -975,7 +975,7 @@ function initMasonryGrid() {
   grid.innerHTML = '';
   
   // Créer un tableau de colonnes
-  const columns = 3;
+  const columns = 4;
   const columnElements = [];
   
   for (let i = 0; i < columns; i++) {
