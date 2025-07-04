@@ -1330,7 +1330,7 @@ footer {
 
   .main-image {
     aspect-ratio: 1/1;
-    width: max-content;
+    width: fit-content;
   }
 
   .thumbnail {
