@@ -3205,6 +3205,8 @@ h1 {
   border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
+  width: 60%;
+  height: auto;
 }
 
 .menu-sidebar.open {
