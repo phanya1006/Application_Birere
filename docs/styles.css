@@ -1318,8 +1318,9 @@ footer {
   .categories-slide,
   .product-details-slide,
   .cart-sidebar {
-    width: 100%;
-    height: 100%;
+    width: 90%;
+    height: 99%;
+    overflow-y: auto;
     padding: 1rem;
   }
 
