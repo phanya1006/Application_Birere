@@ -1320,16 +1320,17 @@ footer {
   .cart-sidebar {
     width: 100%;
     padding: 1rem;
-    height: 100%;
   }
 
   .details-content {
     padding: 1rem;
     gap: 1.5rem;
+    overflow-x: hidden;
   }
 
   .main-image {
     aspect-ratio: 1/1;
+    width: max-content;
   }
 
   .thumbnail {
@@ -3206,8 +3207,6 @@ h1 {
 
 .menu-sidebar.open {
   right: 0;
-  width: 50%;
-  height: auto;
 }
 
 .menu-header {
@@ -3509,4 +3508,102 @@ h1 {
     height: 36px;
     font-size: 1rem;
   }
+}
+
+/* ============ FICHE PRODUIT DÉTAILLÉE ============ */
+.thumbnail-container {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) var(--bg);
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.thumbnail-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.thumbnail-container::-webkit-scrollbar-track {
+  background: var(--bg);
+  border-radius: 3px;
+}
+
+.thumbnail-container::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 3px;
+}
+
+.thumbnail {
+  width: 100px;
+  height: 100px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  overflow: hidden;
+  background: var(--bg);
+  scroll-snap-align: start;
+}
+
+@media (max-width: 768px) {
+  .thumbnail {
+    width: 80px;
+    height: 80px;
+  }
+}
+.thumbnail-container {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) var(--bg);
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.thumbnail-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.thumbnail-container::-webkit-scrollbar-track {
+  background: var(--bg);
+  border-radius: 3px;
+}
+
+.thumbnail-container::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 3px;
+}
+
+.thumbnail {
+  width: 100px;
+  height: 100px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  overflow: hidden;
+  background: var(--bg);
+  scroll-snap-align: start;
+}
+.thumbnail-container {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  width: 100%;
+  max-width: 500px; /* ou la largeur que tu préfères */
+  box-sizing: border-box;
 }
