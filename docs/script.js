@@ -13,7 +13,7 @@ const config = {
   },
   currency: localStorage.getItem('currency') || 'USD',
   language: localStorage.getItem('language') || 'fr',
-  exchangeRate: 3000 // 1 USD = 3000 CDF
+  exchangeRate: 3000, // 1 USD = 3000 CDF
 };
 
 // Traductions
@@ -72,7 +72,17 @@ const translations = {
 document.addEventListener('DOMContentLoaded', initApp);
 
 async function initApp() {
+  // Vérifiez si un produit est demandé dans l'URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const productId = urlParams.get('product');
+  
+  if (productId) {
+    await loadProducts();
+    showProductDetails(productId);
+  }
+  
   await loadProducts();
+  await PromoManager.loadPromoCodes(); // Charger les codes promo
   initTheme();
   initEventListeners();
   renderProducts();
@@ -212,6 +222,11 @@ function filterProductsBySubcategory(category, subcategory) {
   container.appendChild(section);
 
   updateActiveCategoryButton(category);
+
+  const firstProduct = document.querySelector('.product-card');
+  if (firstProduct) {
+    firstProduct.scrollIntoView({ behavior: 'smooth' });
+  }
 }
 
 function createCategorySection(title, products) {
@@ -403,8 +418,8 @@ function displayCart() {
     cartItems.appendChild(li);
   });
 
-  const total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
-  document.getElementById('cartTotal').textContent = `${translate('total')} ${convertCurrency(total)}`;
+  // Mettre à jour le total avec la gestion des codes promo
+  updateCartTotal();
 }
 
 function removeFromCart(cartId) {
@@ -416,6 +431,7 @@ function clearCart() {
   if (confirm("Êtes-vous sûr de vouloir vider tout votre panier ?")) {
     config.cart = [];
     updateCartUI();
+    PromoManager.resetPromo();
   }
 }
 
@@ -425,31 +441,69 @@ function updateCartCount() {
   document.getElementById('cartCountSidebar').textContent = count;
 }
 
-function orderCart() {
+function updateCartTotal() {
+  const total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+  document.getElementById('cartTotal').textContent = `${translate('total')} ${convertCurrency(total)}`;
+}
+
+async function orderCart() {
   if (config.cart.length === 0) {
     alert(translate('emptyCart'));
     return;
   }
 
+  const promoCode = document.getElementById('promoCodeInput')?.value;
   let message = `${translate('order')}:\n`;
+  let total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+  
+  // Ajouter les produits au message
   config.cart.forEach(item => {
-    message += `- ${item.name} (${convertCurrency(parseFloat(item.price))}`;
+    const itemPrice = parseFloat(item.price) * item.quantity;
+    
+    message += `📌 *${item.name}* (${convertCurrency(itemPrice)}`;
     if (item.quantity > 1) message += ` × ${item.quantity}`;
+    message += `)\n`;
+    message += `🖼️ Image: ${item.image}\n`;
     if (item.options) {
-      message += ` [${Object.entries(item.options)
+      message += `⚙️ Options: ${Object.entries(item.options)
         .map(([key, val]) => `${key}: ${val}`)
-        .join(', ')}]`;
-    }
-    if (item.selectedImage) {
-      message += `\nImage: ${item.selectedImage}`;
+        .join(', ')}\n`;
     }
     message += `\n`;
   });
 
-  const total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
-  message += `\n${translate('total')}: ${convertCurrency(total)}`;
+  // Appliquer le code promo si valide
+  if (promoCode) {
+    const isValidPromo = PromoManager.validatePromoCode(promoCode, total);
+    if (isValidPromo) {
+      const discountAmount = total * (PromoManager.currentPromo.discount / 100);
+      message += `\nCode Promo Appliqué: ${promoCode}`;
+      message += `\nRéduction: -${convertCurrency(discountAmount)} (${PromoManager.currentPromo.discount}%)`;
+      message += `\n${translate('total')} Avant Réduction: ${convertCurrency(total)}`;
+      message += `\n${translate('total')} Après Réduction: ${convertCurrency(total - discountAmount)}`;
+    } else {
+      message += `\n\n${translate('total')}: ${convertCurrency(total)}`;
+    }
+  } else {
+    message += `\n\n${translate('total')}: ${convertCurrency(total)}`;
+  }
 
+  // Envoyer la commande via WhatsApp
   openWhatsApp(message);
+
+  // Vider le panier après commande
+  config.cart = [];
+  updateCartUI();
+  PromoManager.resetPromo();
+}
+
+function openWhatsApp(message) {
+  // Formater le message pour WhatsApp
+  const formattedMessage = encodeURIComponent(message);
+  const whatsappUrl = `https://wa.me/${config.phoneNumber}?text=${formattedMessage}`;
+  
+  // Ouvrir dans un nouvel onglet
+  window.open(whatsappUrl, '_blank');
 }
 
 /* ========== FICHE PRODUIT DÉTAILLÉE ========== */
@@ -526,6 +580,12 @@ function showProductDetails(productId) {
         `).join('')}
       </div>` : ''}
       
+      <div class="share-product">
+        <button class="share-btn" id="shareProductBtn">
+          <i class="fas fa-share-alt"></i> Partager le produit
+        </button>
+      </div>
+      
       <div class="details-actions">
         <div class="quantity-selector">
           <button class="qty-btn minus">-</button>
@@ -586,6 +646,9 @@ function showProductDetails(productId) {
     });
   }
 
+  // Gestion du bouton de partage
+  document.getElementById('shareProductBtn').addEventListener('click', () => shareProduct(product));
+
   document.getElementById('productDetailsSlide').classList.add('open');
 }
 
@@ -600,40 +663,85 @@ function closeProductDetails() {
 
 /* ========== FONCTIONS UTILITAIRES ========== */
 
-function openWhatsApp(message) {
-  window.open(`https://wa.me/${config.phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
-}
-
+// Modifiez la fonction filterProducts pour utiliser la nouvelle page de résultats
 function filterProducts() {
-  const input = document.getElementById('searchInput').value.toLowerCase();
-  const container = document.getElementById('categorySections');
-  container.innerHTML = '';
+  const input = document.getElementById('searchInput').value.trim().toLowerCase();
+  
+  if (input === '') {
+    return;
+  }  
 
+  // Masquer la page principale et afficher la page de résultats
+  document.querySelector('.main-container').style.display = 'none';
+  document.getElementById('allProductsPage').style.display = 'none';
+  document.getElementById('searchResultsPage').style.display = 'block';
+  
+  // Filtrer les produits
   const filteredProducts = config.products.filter(p => 
     p.name.toLowerCase().includes(input) || 
-    p.description.toLowerCase().includes(input) ||
+    (p.description && p.description.toLowerCase().includes(input)) ||
     p.category.toLowerCase().includes(input) ||
     (p.subcategory && p.subcategory.toLowerCase().includes(input))
   );
 
-  if (input.trim() === '') {
-    renderProducts();
-    return;
-  }
-
-  if (filteredProducts.length === 0) {
-    container.innerHTML = '<p class="no-products">Aucun résultat trouvé pour "' + input + '"</p>';
-    return;
-  }
-
-  const grid = document.createElement('div');
-  grid.className = 'product-grid vertical-scroll';
+  displaySearchResults(filteredProducts, input);
   
-  filteredProducts.forEach(product => {
-    grid.appendChild(createProductCard(product));
+  // Faire défiler vers le haut des résultats
+  window.scrollTo(0, 0);
+}
+
+// Ajoutez cette nouvelle fonction pour afficher les résultats
+function displaySearchResults(products, searchTerm) {
+  const container = document.getElementById('searchResultsContainer');
+  container.innerHTML = '';
+
+  if (products.length === 0) {
+    container.innerHTML = `
+      <div class="no-results">
+        <i class="fas fa-search"></i>
+        <h3>Aucun résultat trouvé pour "${searchTerm}"</h3>
+        <p>Essayez avec d'autres termes de recherche</p>
+        <button class="retry-search-btn" onclick="resetSearch()">Réessayer</button>
+      </div>
+    `;
+    return;
+  }
+
+  // Créer une grille Masonry-like pour les résultats (comme "Voir tous les produits")
+  const grid = document.createElement('div');
+  grid.className = 'masonry-grid';
+  
+  products.forEach(product => {
+    const item = document.createElement('div');
+    item.className = 'masonry-item always-show-title'; // Ajoutez cette classe
+    item.dataset.id = product.id;
+    
+    const price = convertCurrency(parseFloat(product.price));
+    
+    item.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" class="masonry-img">
+      <div class="masonry-overlay">
+        <h3>${product.name}</h3>
+        <p>${price}</p>
+      </div>
+    `;
+    
+    item.addEventListener('click', () => {
+      showProductDetails(product.id);
+    });
+    
+    grid.appendChild(item);
   });
   
   container.appendChild(grid);
+}
+
+// Ajoutez cette fonction pour réinitialiser la recherche
+function resetSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResultsPage').style.display = 'none';
+  document.querySelector('.main-container').style.display = 'block';
+  window.scrollTo(0, 0);
 }
 
 function filterByCategory(category) {
@@ -661,6 +769,8 @@ function filterByCategory(category) {
   });
 
   updateActiveCategoryButton(category);
+  
+
 }
 
 function resetFilters() {
@@ -882,10 +992,12 @@ function initEventListeners() {
     document.querySelector('.main-container').style.display = 'none';
     document.getElementById('allProductsPage').style.display = 'block';
     initMasonryGrid();
+    // Faire défiler vers le haut
+    window.scrollTo(0, 0);
   });
 
   // Bouton Retour à l'accueil
-  document.querySelector('.back-to-home-btn').addEventListener('click', function() {
+  document.querySelector('#allProductsPage .back-to-home-btn').addEventListener('click', function() {
     document.getElementById('allProductsPage').style.display = 'none';
     document.querySelector('.main-container').style.display = 'block';
     window.scrollTo(0, 0);
@@ -910,6 +1022,15 @@ function initEventListeners() {
   document.getElementById('aboutBtn').addEventListener('click', () => {
     alert("Biréré Express - Votre boutique en ligne préférée\nVersion 1.0");
   });
+  
+  // Validation du code promo
+  document.getElementById('applyPromoBtn').addEventListener('click', function() {
+    const promoCodeInput = document.getElementById('promoCodeInput').value.trim();
+    const total = config.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+    PromoManager.validatePromoCode(promoCodeInput, total);
+  });
+  
+  document.querySelector('#searchResultsPage .back-to-home-btn').addEventListener('click', resetSearch);
 }
 
 /* ========== FONCTIONS PWA ========== */
@@ -1027,7 +1148,6 @@ function initPromoBanners() {
     currentBanner = (currentBanner + 1) % banners.length;
     banners[currentBanner].classList.add('active');
   }, 5000);
- 
 }
 
 /* ========== FONCTIONS SOCIALES ========== */
@@ -1068,3 +1188,42 @@ function updateActiveCategoryButton(category) {
     }
   });
 }
+
+function getProductShareLink(product) {
+  const baseUrl = window.location.href.split('?')[0];
+  return `${baseUrl}?product=${product.id}`;
+}
+
+function shareProduct(product) {
+  const shareUrl = getProductShareLink(product);
+  const shareText = `Regarde ce produit sur Biréré Express: ${product.name}`;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: product.name,
+      text: shareText,
+      url: shareUrl
+    }).catch(err => {
+      console.error('Erreur de partage:', err);
+      fallbackCopy(shareUrl);
+    });
+  } else {
+    fallbackCopy(shareUrl);
+  }
+}
+
+function fallbackCopy(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand('copy');
+  document.body.removeChild(textarea);
+  showNotification('Lien copié dans le presse-papiers!');
+}
+
+// Appliquer le thème sauvegardé au chargement
+document.addEventListener('DOMContentLoaded', function() {
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+});
