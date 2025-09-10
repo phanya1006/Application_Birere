@@ -1,6 +1,6 @@
 // Configuration globale
 const config = {
-  phoneNumber: "+243990462408",
+  phoneNumber: "+243902340124",
   theme: localStorage.getItem('theme') || 'dark',
   cart: [],
   products: [],
@@ -1227,3 +1227,4 @@ document.addEventListener('DOMContentLoaded', function() {
   const savedTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
 });
+
