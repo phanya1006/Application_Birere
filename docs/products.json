@@ -4,7 +4,7 @@
     "name": "air force 1",
     "category": "chaussures",
     "subcategory": "Sport",
-    "image": "https://th.bing.com/th/id/OIP.cdSutgr57t73WDSMI7eNmQHaHa?w=1100&h=1100&rs=1&pid=ImgDetMain",
+    "image": "https://i.pinimg.com/1200x/1c/20/89/1c2089d6ae1138bbeb2f24ff55e7b2d6.jpg",
     "images": [
       "https://snkrscout.com/wp-content/uploads/2022/10/nike-air-force-1-bemalen-idee-grau-500x500.jpg",
       "https://i.etsystatic.com/32174391/r/il/ccf25c/3462007855/il_1140xN.3462007855_ibuy.jpg"
@@ -60,23 +60,6 @@
     ]
   },
   {
-    "id": "iphone 13",
-    "name": "iphone 13 pro",
-    "subcategory": "smartphone",
-    "category": "électronique",
-    "image": "https://media.idownloadblog.com/wp-content/uploads/2021/08/Apple-iPhone-13-Pro-Max-back-camera-closeup.jpg",
-    "price": "350.00",
-    "rating": 4.8,
-    "reviews": 124,
-    "description": "iphone haut de gamme avec écran 120Hz et triple caméra.",
-    "details": {
-      "Écran": "6.7\" AMOLED",
-      "Stockage": "256GB",
-      "Batterie": "5000mAh",
-      "OS": "IOS18"
-    }
-  },
-  {
     "id": "montre-connectee",
     "name": "Montre Connectée Pro",
     "category": "accessoires",
@@ -100,11 +83,11 @@
   },
   {
     "id": "casque-audio",
-    "name": "Casque Audio",
+    "name": "Casque JBL",
     "category": "électronique",
     "subcategory": "ecouteur",
-    "image": "https://media.karousell.com/media/photos/products/2019/12/12/headphones_1576156619_deb31d53.jpg",
-    "price": "14.99",
+    "image": "https://i.pinimg.com/736x/1b/47/fc/1b47fcb94646ffc98b7ed2be4d2e8a39.jpg",
+    "price": "17.99",
     "rating": 4.6,
     "reviews": 156,
     "description": "Casque Bluetooth avec annulation de bruit active."
@@ -122,10 +105,10 @@
   },
   {
     "id": "chaussure-ville",
-    "name": "Chaussures de Ville",
+    "name": "Mocassin",
     "category": "chaussures",
     "subcategory": "pour costume",
-    "image": "https://www.shoestyle.fr/wp-content/uploads/richelieu-chaussure.jpg",
+    "image": "https://i.pinimg.com/736x/80/3a/1b/803a1b25564e8d306e3d14bb5c351727.jpg",
     "price": "49.99",
     "rating": 4.4,
     "reviews": 37,
@@ -144,7 +127,7 @@
   },
   {
     "id": "pc-portable",
-    "name": "PC Portable HP",
+    "name": "PC portable HP 5ème Génération",
     "category": "électronique",
     "subcategory": "ordinateur",
     "image": "https://th.bing.com/th/id/OIP.5MIMPL3XOJ790cND5kflwgHaD6?w=850&h=450&rs=1&pid=ImgDetMain",
@@ -154,12 +137,12 @@
     "description": "EliteBook 14\" 16GB RAM, SSD 512GB, processeur i7."
   },
   {
-    "id": "veste en cuir",
-    "name": "Veste en Cuir",
+    "id": "college",
+    "name": "jacket College",
     "category": "vêtements",
     "subcategory": "dessus",
-    "image": "https://th.bing.com/th/id/OIP.x-Uz8pO0n9GKwi_7PjmttwHaHa?w=670&h=670&rs=1&pid=ImgDetMain",
-    "price": "29.99",
+    "image": "https://i.pinimg.com/1200x/ab/5c/ef/ab5cef36830ff7e39b719955c9f0abab.jpg",
+    "price": "24.99",
     "rating": 4.6,
     "reviews": 45,
     "description": "Veste en cuir véritable, coupe motard."
@@ -677,6 +660,501 @@
         "values": ["64GB", "128GB", "256GB"]
       }
     ]
+  },
+  {
+    "id": "Manette PS4",
+    "name": "Manette PS4",
+    "category": "électronique",
+    "subcategory": "jeux",
+    "image": "https://www.micromania.fr/dw/image/v2/BCRB_PRD/on/demandware.static/-/Sites-masterCatalog_Micromania/default/dwceec81da/images/high-res/dualshock4_2_01_1473280908_1_1.jpg?sw=480&sh=480&sm=fit",
+    "images": [
+      "https://th.bing.com/th/id/OIP.feROqgkTwonV6_l7MBmo2QHaHa?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+      "https://m.media-amazon.com/images/I/614Rpzuh3oL._AC_SL1500_.jpg"
+      
+    ],
+    "price": "19.00",
+    "rating": 4.5,
+    "reviews": 267,
+    "description": "Manettes playstation 4 de bonne qualité"
+    
+  },
+  {
+    "id": "Manette PS4-2",
+    "name": "Manette PS4",
+    "category": "électronique",
+    "subcategory": "jeux",
+    "image": "https://th.bing.com/th/id/R.f2f6289320cc0b101ce1ef7e5006443b?rik=Y%2fNPPAffIHMRVQ&pid=ImgRaw&r=0",
+    "images": [
+      "https://tse1.mm.bing.net/th/id/OIP.QmcwN7Vv5vr_DMxWYA7G5AHaFZ?r=0&w=500&h=364&rs=1&pid=ImgDetMain&o=7&rm=3",
+      "https://tse2.mm.bing.net/th/id/OIP.jd3hPdryv7TkXyo5TP6w4gHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3"
+      
+    ],
+    "price": "27.00",
+    "rating": 4.7,
+    "reviews": 127,
+    "description": "Manettes playstation 4 decorées"
+    
+  },
+  {
+    "id": "Lave auto",
+    "name": "Lave auto",
+    "category": "électronique",
+    "subcategory": "lavage",
+    "image": "https://tse4.mm.bing.net/th/id/OIP.2RXQu84r3NsiKOd6L873_QHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+    "price": "57.00",
+    "rating": 4.7,
+    "reviews": 12,
+    "description": "lave auto , simple à utiliser, puissante et efficace"
+    
+  },
+  {
+    "id": "Manette PC",
+    "name": "Manette PC",
+    "category": "électronique",
+    "subcategory": "jeux",
+    "image": "https://i2.cdscdn.com/pdt2/6/1/7/1/700x700/auc6901234481617/rw/manette-usb-pour-pc-noir.jpg",
+    "price": "8.00",
+    "rating": 3.9,
+    "reviews": 47,
+    "description": "Manette PC, à pris abordable et de bonne qualité, des tutos gratuits seront envoyés aux acheteurs pour la synchronisation xbox360"
+    
+  },
+  {
+    "id": "pentalon boy-fringue",
+    "name": "pentalon Boy-fringue",
+    "category": "vêtements",
+    "subcategory": "pentalon",
+    "image": "https://i.pinimg.com/736x/83/70/bb/8370bbe0024dcf91489b4c8ee88cf251.jpg",
+    "price": "15.00",
+    "rating": 4.2,
+    "reviews": 52,
+    "description": "pentalon large pour homme adulte"
+    
+  },
+  {
+    "id": "chaussure-sport-2",
+    "name": "Adidas campus",
+    "category": "chaussures",
+    "subcategory": "Sport",
+    "image": "https://i.pinimg.com/736x/0b/24/eb/0b24eb7cd20e72b36a58a36d05031b4f.jpg",
+    "images": [
+      "https://i.pinimg.com/736x/ca/b9/75/cab97555ebe537a8550e632be6acb7de.jpg",
+      "https://i.pinimg.com/736x/05/b5/20/05b520fe5ce4c7ead5be1253fe4b04d9.jpg"
+    ],
+    "price": "28.50",
+    "rating": 4.7,
+    "reviews": 56,
+    "description": "Chaussures de haute qualité.",
+    "details": {
+      "Matière": "Mesh respirant",
+      "Semelle": "Gel amortissant",
+      "Poids": "280g"
+    },
+    "options": [
+      {
+        "name": "Taille",
+        "type": "text",
+        "values": ["38", "39", "40", "41", "42", "43", "44"]
+      }
+   
+    ]
+  },
+  {
+    "id": "chaussure-sport-3",
+    "name": "Air force 1 blanc/noir",
+    "category": "chaussures",
+    "subcategory": "Sport",
+    "image": "https://i.pinimg.com/736x/3e/df/f1/3edff1d4d5f52023f215feb93b066524.jpg",
+    "images": [
+      "https://i.pinimg.com/736x/36/ba/b6/36bab693f979933f7a9b403248767d56.jpg",
+      "https://i.pinimg.com/736x/b4/95/5d/b4955d5ca85bfd1ef4099a799a46370e.jpg"
+    ],
+    "price": "27.50",
+    "rating": 4.7,
+    "reviews": 56,
+    "description": "Chaussures de haute qualité.",
+    "details": {
+      "Matière": "Mesh respirant",
+      "Semelle": "Gel amortissant",
+      "Poids": "280g"
+    },
+    "options": [
+      {
+        "name": "Taille",
+        "type": "text",
+        "values": ["38", "39", "40", "41", "42", "43", "44"]
+      }
+   
+    ]
+  },
+  {
+    "id": "chaussure-sport-4",
+    "name": "Adidas",
+    "category": "chaussures",
+    "subcategory": "Sport",
+    "image": "https://i.pinimg.com/736x/e1/40/54/e1405451689d97f7ccf1bcd55c2bb50f.jpg",
+    "price": "25.00",
+    "rating": 4.7,
+    "reviews": 56,
+    "description": "Chaussures de haute qualité.",
+    "details": {
+      "Matière": "Mesh respirant",
+      "Semelle": "Gel amortissant",
+      "Poids": "280g"
+    },
+    "options": [
+      {
+        "name": "Taille",
+        "type": "text",
+        "values": ["38", "39", "40", "41", "42", "43", "44"]
+      }
+   
+    ]
+  },
+  {
+    "id": "chaussure-sport-5",
+    "name": "Vans",
+    "category": "chaussures",
+    "subcategory": "Sport",
+    "image": "https://i.pinimg.com/1200x/8f/8d/81/8f8d81b2de06d6a55c7a5c6dee1ddd90.jpg",
+    "price": "24.50",
+    "rating": 4.7,
+    "reviews": 56,
+    "description": "Chaussures de haute qualité.",
+    "details": {
+      "Matière": "Mesh respirant",
+      "Semelle": "Gel amortissant",
+      "Poids": "280g"
+    },
+    "options": [
+      {
+        "name": "Taille",
+        "type": "text",
+        "values": ["38", "39", "40", "41", "42", "43", "44"]
+      }
+   
+    ]
+  },
+  {
+    "id": "chaussure-sport-6",
+    "name": "Jordan 1",
+    "category": "chaussures",
+    "subcategory": "Sport",
+    "image": "https://i.pinimg.com/736x/f0/ba/02/f0ba0221c1d2e5d0243f9b681fd3c04d.jpg",
+    "images": [
+      "https://i.pinimg.com/736x/fe/02/97/fe0297974ae31db7511e6e0d605766a8.jpg",
+      "https://i.pinimg.com/1200x/a2/6e/4a/a26e4aff59b012a9c82ae7afa06771c8.jpg"
+    ],
+    "price": "25.50",
+    "rating": 4.7,
+    "reviews": 56,
+    "description": "Chaussures de haute qualité.",
+    "details": {
+      "Matière": "Mesh respirant",
+      "Semelle": "Gel amortissant",
+      "Poids": "280g"
+    },
+    "options": [
+      {
+        "name": "Taille",
+        "type": "text",
+        "values": ["38", "39", "40", "41", "42", "43", "44"]
+      }
+   
+    ]
+  },
+  {
+    "id": "chaussure-sport-7",
+    "name": "Nike SB",
+    "category": "chaussures",
+    "subcategory": "Sport",
+    "image": "https://i.pinimg.com/736x/43/1b/8c/431b8c9053a297957be7e25bbc99ccc2.jpg",
+    "images": [
+      "https://i.pinimg.com/1200x/1c/54/3a/1c543a3626ea83326772e146c1f1575e.jpg",
+      "https://i.pinimg.com/1200x/18/f9/bf/18f9bfe63a7ac104808054e702e33958.jpg"
+    ],
+    "price": "25.50",
+    "rating": 4.7,
+    "reviews": 56,
+    "description": "Chaussures de haute qualité.",
+    "details": {
+      "Matière": "Mesh respirant",
+      "Semelle": "Gel amortissant",
+      "Poids": "280g"
+    },
+    "options": [
+      {
+        "name": "Taille",
+        "type": "text",
+        "values": ["38", "39", "40", "41", "42", "43", "44"]
+      }
+   
+    ]
+  
+  },
+  {
+    "id": "faux-cils-huda-beauty",
+    "name": "faux cils Huxa beauty",
+    "category": "beauté",
+    "subcategory": "cils",
+    "image": "https://i.pinimg.com/1200x/41/7a/ef/417aef1a7f47b15e05ae71d82862ddf3.jpg",
+    "price": "9.00",
+    "rating": 4.9,
+    "reviews": 87,
+    "description": "Faux cils premium Huxa Beauty - 1 paire - Effet naturel et volumineux"
+  },
+  {
+    "id": "faux-cils-red-cherry",
+    "name": "Faux cils red cherry",
+    "category": "beauté",
+    "subcategory": "cils",
+    "image": "https://i.pinimg.com/736x/78/62/d7/7862d7ebcbeb5036f63795b1d174c9bb.jpg",
+    "price": "10.00",
+    "rating": 4.3,
+    "reviews": 67,
+    "description": "Faux cils Red Cherry - 1 paire - Qualité professionnelle à prix abordable"
+  },
+  {
+    "id": "faux-cils-fashion-eyes",
+    "name": "Faux cils Fashion Eyes lashes",
+    "category": "beauté",
+    "subcategory": "cils",
+    "image": "https://images.tcdn.com.br/img/img_prod/783769/cartela_de_cilios_3_pares_modelo_ana_3819_1_3fa0bca840c4cf338b52fbfe4a625c3b.jpg",
+    "price": "14.00",
+    "rating": 4.3,
+    "reviews": 67,
+    "description": "Faux cils Fashion Eyes - Pack de 3 paires - Parfait pour usage quotidien"
+  },
+  {
+    "id": "boite-maquillage-miltan",
+    "name": "Boite de maquillage Miltan",
+    "category": "beauté",
+    "subcategory": "rangement",
+    "image": "https://m.media-amazon.com/images/I/71lGfjNqNpL._AC_SS450_.jpg",
+    "price": "15.00",
+    "rating": 4.6,
+    "reviews": 234,
+    "description": "Boite de rangement maquillage Miltan - Organisation parfaite pour vos produits beauté"
+  },
+  {
+    "id": "deodorant-nivea",
+    "name": "Déodorant Nivea",
+    "category": "hygiène",
+    "subcategory": "déodorant",
+    "image": "https://i.pinimg.com/736x/54/9a/dc/549adcacb0bb66c4a60c9f80b6aeb2c8.jpg",
+    "price": "5.00",
+    "rating": 4.8,
+    "reviews": 456,
+    "description": "Déodorant Nivea - Protection 48h - Fraîcheur intense"
+  },
+  {
+    "id": "deodorant-nivea-2",
+    "name": "mini Déodorant Nivea",
+    "category": "hygiène",
+    "subcategory": "déodorant",
+    "image": "https://i.pinimg.com/1200x/04/b6/f6/04b6f60fe084903c4f4d46d47bfb7d66.jpg",
+    "images": [
+      "https://i.pinimg.com/1200x/9d/b9/9a/9db99a0a8ed7bd3682fd6ab213b0b851.jpg",
+      "https://i.pinimg.com/1200x/28/23/cf/2823cfb8f8fdedee093e3ac4a958cbbd.jpg"
+    ],
+    "price": "4.00",
+    "rating": 4.2,
+    "reviews": 123,
+    "description": "Déodorant Nivea - Protection 48h - Fraîcheur intense"
+  },
+  {
+    "id": "boulettes-toilettes",
+    "name": "Boulettes de toilettes",
+    "category": "maison",
+    "subcategory": "entretien",
+    "image": "https://i.pinimg.com/736x/eb/2d/09/eb2d0954d1759faaea62a353fb068cd5.jpg",
+    "price": "4.00",
+    "rating": 4.3,
+    "reviews": 267,
+    "description": "Boulettes nettoyantes pour toilettes - Désodorisant et nettoyant"
+  },
+  {
+    "id": "baygon",
+    "name": "Baygon",
+    "category": "maison",
+    "subcategory": "insecticide",
+    "image": "https://lzd-img-global.slatic.net/g/ff/kf/S063c2b7310ca4b9aa27d1e5b751e60deM.jpg_720x720q80.jpg",
+    "price": "9.00",
+    "rating": 4.4,
+    "reviews": 178,
+    "description": "Insecticide Baygon - Protection contre les insectes volants et rampants"
+  },
+  {
+    "id": "mixeur-kenwood",
+    "name": "Mixeur Kenwood",
+    "category": "électroménager",
+    "subcategory": "cuisine",
+    "image": "https://i.pinimg.com/1200x/27/b5/23/27b5234bc300fd7da56f176a5b5db5d2.jpg",
+    "price": "45.00",
+    "rating": 4.9,
+    "reviews": 156,
+    "description": "Mixeur Kenwood - Puissance 1000W - Plusieurs accessoires inclus"
+  },
+  {
+    "id": "drone-phantom",
+    "name": "Drone Phantom",
+    "category": "électronique",
+    "subcategory": "drone",
+    "image": "https://i.pinimg.com/1200x/2f/63/be/2f63be51ea65f74ee3f27b7591d053c0.jpg",
+    "price": "79.99",
+    "rating": 4.7,
+    "reviews": 89,
+    "description": "Drone Phantom - Caméra HD - Temps de vol 25 minutes - Contrôle distance 500m"
+  },
+  {
+    "id": "mini-billard",
+    "name": "Mini billard",
+    "category": "loisirs",
+    "subcategory": "jeux",
+    "image": "https://i.pinimg.com/1200x/0b/c8/f5/0bc8f58dc55048daa8c2e44b5dd2c7b2.jpg",
+    "price": "25.00",
+    "rating": 4.5,
+    "reviews": 134,
+    "description": "Table de billard miniature - Parfait pour enfants et décoration"
+  },
+  {
+    "id": "caisse-epargne",
+    "name": "Petite caisse épargne classique",
+    "category": "maison",
+    "subcategory": "rangement",
+    "image": "https://i.ebayimg.com/images/g/qKwAAOSwlN1lur8l/s-l1600.jpg",
+    "price": "22.00",
+    "rating": 4.6,
+    "reviews": 201,
+    "description": "Caisse épargne furtive - Serrure de sécurité - Idéal pour économies"
+  },
+  {
+    "id": "souris-gaming-hp",
+    "name": "Souris gaming HP",
+    "category": "électronique",
+    "subcategory": "gaming",
+    "image": "https://premicecomputer.com/wp-content/uploads/2021/06/LD0004854486_2.jpg",
+    "price": "7.00",
+    "rating": 4.2,
+    "reviews": 156,
+    "description": "Souris gaming HP - RGB - Précision optique"
+  },
+  {
+    "id": "montre-naviforce",
+    "name": "Montre Naviforce NF9236",
+    "category": "accessoires",
+    "subcategory": "montre",
+    "image": "https://ae01.alicdn.com/kf/H17b765141da84b39924b96e09ad91319k/NAVIFORCE-montre-Quartz-pour-homme-marque-de-luxe-acier-inoxydable-tanche-chronographe-sport.jpg",
+    "price": "26.00",
+    "rating": 4.4,
+    "reviews": 178,
+    "description": "Montre Naviforce - Design élégant - Étanche - Multiple affichages"
+  },
+  {
+    "id": "montre-naviforce-2",
+    "name": "Montre Naviforce digitale",
+    "category": "accessoires",
+    "subcategory": "montre",
+    "image": "https://tse1.mm.bing.net/th/id/OIP.MyaY9rAVk89kA8pYLyG71gAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+    "price": "24.00",
+    "rating": 4.4,
+    "reviews": 178,
+    "description": "Montre Naviforce - Design élégant - Étanche - Multiple affichages"
+  },
+  {
+    "id": "belleda",
+    "name": " montre jam tangan pria",
+    "category": "accessoires",
+    "subcategory": "montre",
+    "image": "https://lzd-img-global.slatic.net/g/ff/kf/S670cdbe4a0744f5383f97ab2dd59c2a1F.jpg_720x720q80.jpg",
+    "price": "24.00",
+    "rating": 4.4,
+    "reviews": 178,
+    "description": "Montre Naviforce - Design élégant - Étanche - Multiple affichages"
+  },
+  {
+    "id": "chaudiere-scarlett",
+    "name": "Chaudière Scarlett",
+    "category": "électroménager",
+    "subcategory": "cuisine",
+    "image": "https://i.pinimg.com/1200x/04/9e/c0/049ec01bb36d0dfe008667a49baa642f.jpg",
+    "price": "15.00",
+    "rating": 4.3,
+    "reviews": 189,
+    "description": "Chaudière électrique Scarlett - Capacité 1.7L - Arrêt automatique"
+  },
+  {
+    "id": "chaudiere-electrique",
+    "name": "Chaudière électrique kettle",
+    "category": "électroménager",
+    "subcategory": "cuisine",
+    "image": "https://i.pinimg.com/1200x/4c/a2/81/4ca281ce606a609f7beff2027baea9d0.jpg",
+    "price": "10.00",
+    "rating": 4.1,
+    "reviews": 145,
+    "description": "Chaudière électrique basique - Rapide et efficace - Indicateur de niveau d'eau"
+  },
+  {
+    "id": "Manette-Xbox360",
+    "name": "Manette Xbox360",
+    "category": "électronique",
+    "subcategory": "jeux",
+    "image": "https://i.pinimg.com/736x/6e/bd/a5/6ebda5fcea0bc1d94bc9bfe703d30d18.jpg",
+    "price": "64.00",
+    "rating": 4.5,
+    "reviews": 267,
+    "description": "Manettes XBOX360 de bonne qualité, directement compatible aux jeux PC"
+    
+  },
+  {
+    "id": "lotion-nivea",
+    "name": "lotion Nivea",
+    "category": "hygiène",
+    "subcategory": "lotion",
+    "image": "https://i.pinimg.com/736x/93/98/34/939834e42d7fab06a49cd554a36721dc.jpg",
+    "images": [
+      "https://i.pinimg.com/1200x/c8/c9/f5/c8c9f543c4f8daa9c3753e4da215a79f.jpg",
+      "https://i.pinimg.com/736x/d6/97/03/d697038b9f56f85a911aab1c7f29fae8.jpg",
+      "https://i.pinimg.com/736x/4c/2e/ad/4c2eadb0166f747de5493dcfb78695ff.jpg"
+    ],
+    "price": "9.00",
+    "rating": 4.2,
+    "reviews": 123,
+    "description": "Déodorant Nivea - Protection 48h - Fraîcheur intense"
+  },
+  {
+    "id": "raquette",
+    "name": "raquette de tennis",
+    "category": "loisirs",
+    "subcategory": "sport",
+    "image": "https://i.pinimg.com/1200x/0e/5d/4f/0e5d4fb75dc4b82e8f4ad921293707b1.jpg",
+    "price": "24.50",
+    "rating": 4.2,
+    "reviews": 123,
+    "description": "Raquette de tennis d'ocasion, de qualité"
+  },
+  {
+    "id": "boule-basket",
+    "name": "boule de basket",
+    "category": "loisirs",
+    "subcategory": "sport",
+    "image": "https://i.pinimg.com/1200x/ac/52/ff/ac52ff038a1375463bc139df779b2bf2.jpg",
+    "price": "65.50",
+    "rating": 4.2,
+    "reviews": 123,
+    "description": "pour vous , des ballons de basket à bon prix"
+  },
+  {
+    "id": "gant-boxe",
+    "name": "gant de boxe",
+    "category": "loisirs",
+    "subcategory": "sport",
+    "image": "https://i.pinimg.com/1200x/d6/75/de/d675dececd39973a7a2a4c12cff3c5d5.jpg",
+    "price": "69.50",
+    "rating": 4.2,
+    "reviews": 123,
+    "description": "la meilleure qualité à bon prix pour vous"
   }
-]
+] 
+  
 
