@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr" data-theme="dark">
 <head>
@@ -35,6 +36,11 @@
         <span>Total:</span>
         <span id="cartTotal">0.00 USD</span>
       </div>
+      <div class="promo-section">
+       <input type="text" id="promoCodeInput" placeholder="Code promo (d'un ami)">
+       <button id="applyPromoBtn">Vérifier</button>
+       <div id="promoCodeStatus"></div>
+      </div>
       <div class="cart-buttons">
         <button class="clear-cart-btn"><i class="fas fa-trash"></i> Vider</button>
         <button class="order-btn"><i class="fas fa-check"></i> Commander</button>
@@ -69,6 +75,7 @@
       <button class="close-menu">&times;</button>
     </div>
     <ul class="menu-items">
+      
       <li>
         <button class="menu-item" id="guideBtn">
           <span><i class="fas fa-book"></i> Guide d'utilisation</span>
@@ -94,6 +101,7 @@
           <span><i class="fas fa-headset"></i> Support client</span>
         </button>
       </li>
+      
       <li>
         <button class="menu-item" id="aboutBtn">
           <span><i class="fas fa-info-circle"></i> À propos</span>
@@ -187,6 +195,14 @@
       </button>
     </div>
   </div>
+   <!-- Ajoutez cette section juste avant la section "Masonry Grid" -->
+ <div id="searchResultsPage" style="display:none;">
+   <div class="search-results-header">
+     <button class="back-to-home-btn"><i class="fas fa-arrow-left"></i> Retour à l'accueil</button>
+     <h2 class="section-title">Résultats de recherche</h2>
+    </div>
+   <div class="search-results-container" id="searchResultsContainer"></div>
+ </div>
 
   <!-- Masonry Grid (nouvelle page) -->
   <div id="allProductsPage" style="display:none;">
@@ -303,5 +319,6 @@
   </div>
 
   <script src="script.js"></script>
+  <script src="promo-management.js"></script>
 </body>
 </html>
