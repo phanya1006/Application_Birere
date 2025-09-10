@@ -1,0 +1,72 @@
+{
+  "promoCodes": [
+    {
+      "code": "BIENVENUE10",
+      "description": "Code de bienvenue - 10% de réduction",
+      "discount": 10,
+      "type": "percentage",
+      "active": true,
+      "expiration": "2024-12-31"
+    },
+    {
+      "code": "LIVRAISONGratuite",
+      "description": "Livraison gratuite sur toute commande",
+      "discount": 0,
+      "type": "free_shipping",
+      "active": true,
+      "minPurchase": 50,
+      "expiration": "2024-06-30"
+    },
+    {
+      "code": "ETE2024",
+      "description": "Promo été 2024 - 15% de réduction",
+      "discount": 15,
+      "type": "percentage",
+      "active": true,
+      "expiration": "2024-08-31"
+    },
+    {
+      "code": "PREMIUM20",
+      "description": "Code premium - 20% de réduction",
+      "discount": 20,
+      "type": "percentage",
+      "active": true,
+      "minPurchase": 100,
+      "expiration": "2024-10-15"
+    },
+    {
+      "code": "SOLDE25",
+      "description": "Soldes exceptionnelles - 25% de réduction",
+      "discount": 25,
+      "type": "percentage",
+      "active": false,
+      "expiration": "2023-12-31"
+    },
+    {
+      "code": "FIDELITE5",
+      "description": "Code fidélité - 5% de réduction permanente",
+      "discount": 5,
+      "type": "percentage",
+      "active": true,
+      "expiration": null
+    },
+    {
+      "code": "ELECTRO15",
+      "description": "Promo électronique - 15% de réduction",
+      "discount": 15,
+      "type": "percentage",
+      "active": true,
+      "category": "électronique",
+      "expiration": "2026-07-15"
+    },
+    {
+      "code": "CHASSURES20",
+      "description": "Promo chaussures - 20% de réduction",
+      "discount": 20,
+      "type": "percentage",
+      "active": true,
+      "category": "chaussures",
+      "expiration": "2025-12-31"
+    }
+  ]
+}
